@@ -9,7 +9,7 @@ var INVALID_PLAYER_COUNT = 2;
 var ERROR_LIST = [
 	'no error',
 	'invalid gametype',
-	'invalid player count (must be 8)'
+	'invalid player count (must be even)'
 ];
 
 var setSteamId = function(discordId, steamId) {
@@ -54,25 +54,54 @@ var shuffle = function(gametype, playerList, done) {
 		var bestCombo;
 		var bestDiff = Number.MAX_VALUE;
 		
-		for (var i=0; i<8; i++)
-		for (var j=i+1; j<8; j++)
-		for (var k=j+1; k<8; k++)
-		for (var l=k+1; l<8; l++) {
-			var result = playerList.reduce(function(sum, current, m) {
-				if ( (m == i) || (m == j) || (m == k) || (m == l) ) {
-					sum.blue.push(current);
-					sum.blue_elo += current.elo;
-				} else {
-					sum.red.push(current);
-					sum.red_elo += current.elo;
-				}
-				return sum;
-			}, {red: [], blue: [], red_elo: 0, blue_elo: 0});
-			
-			if (Math.abs(result.red_elo - result.blue_elo) < bestDiff) {
-				bestCombo = extend({}, result);
+		// процедура получения сочетаний без повторнеия
+		// n = Object.keys(playerList).length
+		// k = parseInt(Object.keys(playerList).length/2)
+		var f = function(i, indices, start_j) {
+			if (typeof(i) == 'undefined') {
+				i = 0;
+				indices = [0];
+				start_j = 0;
 			}
-		}
+			
+			if (start_j >= Object.keys(playerList).length) {
+				return;
+			}
+			
+			indices[i] = start_j;
+			
+			if ( (i != parseInt(Object.keys(playerList).length/2) - 1) && (indices[i] == Object.keys(playerList).length - 1) ) {
+				return;
+			}
+			
+			if (i == parseInt(Object.keys(playerList).length/2) - 1) {
+				//console.log(indices);
+				var result = playerList.reduce(function(sum, current, m) {
+					if (indices.some(function(indice) {
+						return indice == m;
+					})) {
+						sum.blue.push(current);
+						sum.blue_elo += current.elo;
+					} else {
+						sum.red.push(current);
+						sum.red_elo += current.elo;
+					}
+					return sum;
+				}, {red: [], blue: [], red_elo: 0, blue_elo: 0});
+				
+				if (Math.abs(result.red_elo - result.blue_elo) < bestDiff) {
+					bestCombo = extend({}, result);
+					bestDiff = Math.abs(result.red_elo - result.blue_elo);
+				}
+				f(i, indices, start_j+1);
+			} else {
+				for(var j=start_j; j<Object.keys(playerList).length; j++) {
+					indices[i] = j;
+					f(i+1, indices, j+1);
+				}
+			}
+		};
+		f();
 		
 		// записываем тех, что без рейтинга
 		bestCombo.unrated = playerList.reduce(function(sum, current) {
@@ -99,8 +128,8 @@ var shuffle = function(gametype, playerList, done) {
 	
 	// основной метод
 	
-	// принимаем только 8 игроков
-	if (Object.keys(playerList).length != 8) {
+	// принимаем четное количество игроков
+	if (Object.keys(playerList).length%2 != 0) {
 		done({
 			"ok": false,
 			"error_code": INVALID_PLAYER_COUNT,
