@@ -25,6 +25,16 @@ app.get('/tdm/:discord_ids', function (req, res) {
 });
 
 app.get('/map/:discord_id/:steam_id', function (req, res) {
+	res.setHeader("Content-Type", "application/json");
+	if (typeof(ql.d2s[req.params.discord_id]) == 'undefined') {
+		ql.setSteamId(req.params.discord_id, req.params.steam_id);
+		res.send({ok: true});
+	} else {
+		res.send({ok: false, message: 'idi na hui'});
+	}
+});
+
+app.get('/force_map/:discord_id/:steam_id', function (req, res) {
 	ql.setSteamId(req.params.discord_id, req.params.steam_id);
 	res.setHeader("Content-Type", "application/json");
 	res.send({ok: true});

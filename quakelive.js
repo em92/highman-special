@@ -172,3 +172,4 @@ var shuffle = function(gametype, playerList, done) {
 
 module.exports.shuffle = shuffle;
 module.exports.setSteamId = setSteamId;
+module.exports.d2s = d2s;
