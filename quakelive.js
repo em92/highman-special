@@ -106,7 +106,7 @@ var shuffle = function(gametype, playerList, done) {
 		// записываем тех, что без рейтинга
 		bestCombo.unrated = playerList.reduce(function(sum, current) {
 			if (current.steamid == '0') {
-				sum.unrated.push(current.discordid);
+				sum.push(current.discordid);
 			}
 			return sum;
 		}, []);
