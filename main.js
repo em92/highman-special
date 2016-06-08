@@ -10,15 +10,8 @@ var convertDiscordIdsToArray = function(s) {
 	return data;
 };
 
-app.get('/ctf/:discord_ids', function (req, res) {
-	ql.shuffle("ctf", convertDiscordIdsToArray(req.params.discord_ids), function(result) {
-		res.setHeader("Content-Type", "application/json");
-		res.send(result);
-	});
-});
-
-app.get('/tdm/:discord_ids', function (req, res) {
-	ql.shuffle("tdm", convertDiscordIdsToArray(req.params.discord_ids), function(result) {
+app.get('/:gametype/:discord_ids', function (req, res) {
+	ql.shuffle(req.params.gametype, convertDiscordIdsToArray(req.params.discord_ids), function(result) {
 		res.setHeader("Content-Type", "application/json");
 		res.send(result);
 	});

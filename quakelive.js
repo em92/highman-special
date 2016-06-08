@@ -19,6 +19,9 @@ var setSteamId = function(discordId, steamId) {
 
 var shuffle = function(gametype, playerList, done) {
 	
+	var teamsize = parseInt(Object.keys(playerList).length / 2);
+	var playercount = Object.keys(playerList).length;
+	
 	// метод получения рейтинга
 	var getRatings = function(done, fuck) {
 		var path = '/elo_b/' + playerList.reduce(function(sum, current) {
@@ -55,8 +58,8 @@ var shuffle = function(gametype, playerList, done) {
 		var bestDiff = Number.MAX_VALUE;
 		
 		// процедура получения сочетаний без повторнеия
-		// n = Object.keys(playerList).length
-		// k = parseInt(Object.keys(playerList).length/2)
+		// n = playercount
+		// k = teamsize
 		var f = function(i, indices, start_j) {
 			if (typeof(i) == 'undefined') {
 				i = 0;
@@ -64,17 +67,17 @@ var shuffle = function(gametype, playerList, done) {
 				start_j = 0;
 			}
 			
-			if (start_j >= Object.keys(playerList).length) {
+			if (start_j >= playercount) {
 				return;
 			}
 			
 			indices[i] = start_j;
 			
-			if ( (i != parseInt(Object.keys(playerList).length/2) - 1) && (indices[i] == Object.keys(playerList).length - 1) ) {
+			if ( (i != teamsize - 1) && (indices[i] == playercount - 1) ) {
 				return;
 			}
 			
-			if (i == parseInt(Object.keys(playerList).length/2) - 1) {
+			if (i == teamsize - 1) {
 				//console.log(indices);
 				var result = playerList.reduce(function(sum, current, m) {
 					if (indices.some(function(indice) {
@@ -95,7 +98,7 @@ var shuffle = function(gametype, playerList, done) {
 				}
 				f(i, indices, start_j+1);
 			} else {
-				for(var j=start_j; j<Object.keys(playerList).length; j++) {
+				for(var j=start_j; j<playercount; j++) {
 					indices[i] = j;
 					f(i+1, indices, j+1);
 				}
@@ -116,9 +119,9 @@ var shuffle = function(gametype, playerList, done) {
 			return b.elo - a.elo;
 		};
 		bestCombo.red.sort(sortByEloCallback);
-		bestCombo.red_elo = parseInt(bestCombo.red_elo/4);
+		bestCombo.red_elo = parseInt(bestCombo.red_elo/teamsize);
 		bestCombo.blue.sort(sortByEloCallback);
-		bestCombo.blue_elo = parseInt(bestCombo.blue_elo/4);
+		bestCombo.blue_elo = parseInt(bestCombo.blue_elo/teamsize);
 		
 		done({
 			"ok": true,
@@ -129,7 +132,7 @@ var shuffle = function(gametype, playerList, done) {
 	// основной метод
 	
 	// принимаем четное количество игроков
-	if (Object.keys(playerList).length%2 != 0) {
+	if (playercount%2 != 0) {
 		done({
 			"ok": false,
 			"error_code": INVALID_PLAYER_COUNT,
