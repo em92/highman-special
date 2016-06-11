@@ -208,7 +208,7 @@ var shuffle = function(gametype, playerList, done) {
 			return b.elo - a.elo;
 		};
 		bestCombo[0].players.sort(sortByEloCallback);
-		bestCombo[0].team_elo = parseInt(bestCombo[1].team_elo/teamsize);
+		bestCombo[0].team_elo = parseInt(bestCombo[0].team_elo/teamsize);
 		bestCombo[1].players.sort(sortByEloCallback);
 		bestCombo[1].team_elo = parseInt(bestCombo[1].team_elo/teamsize);
 		
