@@ -117,7 +117,7 @@ var shuffle = function(gametype, playerList, done) {
 			response.on("end", function() {
 				data = JSON.parse(data);
 				playerList.forEach(function(item, i, a) {
-					a[i].elo = 1500;
+					a[i].elo = 0;
 					a[i].steamname = "noname";
 					data.players.forEach(function(jtem) {
 						if (jtem.steamid == item.steamid) {
@@ -167,18 +167,23 @@ var shuffle = function(gametype, playerList, done) {
 					if (indices.some(function(indice) {
 						return indice == m;
 					})) {
-						sum.blue.push(current);
-						sum.blue_elo += current.elo;
+						sum[0].players.push(current);
+						sum[0].team_elo += current.elo;
 					} else {
-						sum.red.push(current);
-						sum.red_elo += current.elo;
+						sum[1].players.push(current);
+						sum[1].team_elo += current.elo;
 					}
 					return sum;
-				}, {red: [], blue: [], red_elo: 0, blue_elo: 0});
+				}, [
+						{name: "blue",		team_elo: 0,	players: []},
+						{name: "red",		team_elo: 0,	players: []},
+						{name: "unrated",	team_elo: 0,	players: []}
+					]
+				);
 				
-				if (Math.abs(result.red_elo - result.blue_elo) < bestDiff) {
-					bestCombo = extend({}, result);
-					bestDiff = Math.abs(result.red_elo - result.blue_elo);
+				if (Math.abs(result[1].team_elo - result[0].team_elo) < bestDiff) {
+					bestCombo = result.slice();
+					bestDiff = Math.abs(result[1].team_elo - result[0].team_elo);
 				}
 				f(i, indices, start_j+1);
 			} else {
@@ -191,9 +196,9 @@ var shuffle = function(gametype, playerList, done) {
 		f();
 		
 		// записываем тех, что без рейтинга
-		bestCombo.unrated = playerList.reduce(function(sum, current) {
+		bestCombo[2].players = playerList.reduce(function(sum, current) {
 			if (current.steamid == '0') {
-				sum.push(current.discordid);
+				sum.push(current);
 			}
 			return sum;
 		}, []);
@@ -202,14 +207,14 @@ var shuffle = function(gametype, playerList, done) {
 		var sortByEloCallback = function(a, b) {
 			return b.elo - a.elo;
 		};
-		bestCombo.red.sort(sortByEloCallback);
-		bestCombo.red_elo = parseInt(bestCombo.red_elo/teamsize);
-		bestCombo.blue.sort(sortByEloCallback);
-		bestCombo.blue_elo = parseInt(bestCombo.blue_elo/teamsize);
+		bestCombo[0].players.sort(sortByEloCallback);
+		bestCombo[0].team_elo = parseInt(bestCombo[1].team_elo/teamsize);
+		bestCombo[1].players.sort(sortByEloCallback);
+		bestCombo[1].team_elo = parseInt(bestCombo[1].team_elo/teamsize);
 		
 		done({
 			"ok": true,
-			"data": bestCombo
+			"teams": bestCombo
 		});
 	};
 	
