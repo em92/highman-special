@@ -17,6 +17,18 @@ var ERROR_LIST = [
 	'steam id already set. use /force_map method'
 ];
 
+var removeColorsFromQLNickname = function(name) {
+	name = name.split("^0").join("");
+	name = name.split("^1").join("");
+	name = name.split("^2").join("");
+	name = name.split("^3").join("");
+	name = name.split("^4").join("");
+	name = name.split("^5").join("");
+	name = name.split("^6").join("");
+	name = name.split("^7").join("");
+	return name;
+};
+
 var GetPlayerSummaries = function(steamids, done, fuck) {
 	var params = {
 		host: "api.steampowered.com",
@@ -51,6 +63,7 @@ var setSteamId = function(discordId, steamId, done) {
 	};
 	
 	// сначала проверяем валидности steamId
+	// и определяем ник в стиме
 	GetPlayerSummaries(steamId, function(data) {
 		if (data.response.players.length == 0) {
 			done({
@@ -62,7 +75,10 @@ var setSteamId = function(discordId, steamId, done) {
 			d2s[discordId] = steamId;
 			fs.writeFile("./d2s.json", JSON.stringify(d2s), function(err) {
 				if (err) fuck(err);
-				done({ok: true});
+				done({
+					ok: true,
+					steamname: removeColorsFromQLNickname(data.response.players[0].personaname)
+				});
 			});
 		}
 	}, fuck);
@@ -226,16 +242,7 @@ var shuffle = function(gametype, playerList, done) {
 		var GetPlayerSummariesCallback = function(data) {
 			
 			data.response.players.forEach(function(player) {
-				var name = player.personaname;
-				name = name.split("^0").join("");
-				name = name.split("^1").join("");
-				name = name.split("^2").join("");
-				name = name.split("^3").join("");
-				name = name.split("^4").join("");
-				name = name.split("^5").join("");
-				name = name.split("^6").join("");
-				name = name.split("^7").join("");
-				steamNames[player.steamid] = name;
+				steamNames[player.steamid] = removeColorsFromQLNickname(player.personaname);
 			});
 			
 			// если не получится получить рейтинги
