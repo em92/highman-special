@@ -1,4 +1,7 @@
 var express = require('express');
+var morgan = require('morgan');
+var fs = require('fs');
+var path = require('path');
 var ql = require("./quakelive.js");
 
 var httpd_port = require("./cfg.json").httpd_port;
@@ -10,6 +13,11 @@ var convertDiscordIdsToArray = function(s) {
 	});
 	return data;
 };
+
+app.use(morgan('combined', {
+	skip: false,
+	stream: fs.createWriteStream(path.join(__dirname, 'access.log'), {flags: 'a'})
+}));
 
 app.get('/shuffle/:gametype/:discord_ids', function (req, res) {
 	ql.shuffle(req.params.gametype.toLowerCase(), convertDiscordIdsToArray(req.params.discord_ids), function(result) {
