@@ -15,7 +15,12 @@ var convertDiscordIdsToArray = function(s) {
 };
 
 app.use(morgan('combined', {
-	skip: false,
+	skip: function (req, res) { return (
+		(
+			(req.connection.remoteAddress == '::ffff:127.0.0.1') || 
+			(req.connection.remoteAddress == '::1')
+		) && (req.headers['x-forwarded-for']) 
+	); },
 	stream: fs.createWriteStream(path.join(__dirname, 'access.log'), {flags: 'a'})
 }));
 
@@ -39,6 +44,7 @@ app.get('/force_map/:discord_id/:steam_id', function (req, res) {
 		res.send(result);
 	});
 });
+
 
 app.listen(httpd_port, function () {
 	console.log("privet, pupsik :3");
