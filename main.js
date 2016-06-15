@@ -45,6 +45,13 @@ app.get('/force_map/:discord_id/:steam_id', function (req, res) {
 	});
 });
 
+app.get('/whois/:discord_id', function (req, res) {
+	ql.getSteamId(req.params.discord_id, function(result) {
+		res.setHeader("Content-Type", "application/json");
+		res.send(result);
+	});
+});
+
 
 app.listen(httpd_port, function () {
 	console.log("privet, pupsik :3");

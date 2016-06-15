@@ -3,18 +3,21 @@ var fs = require('fs');
 var extend = require('util')._extend;
 var d2s = require('./d2s.json');
 var steamApiKey = require('./cfg.json').steamApiKey;
+var request = require('request');
 
 var NO_ERROR = 0;
 var INVALID_GAMETYPE = 1;
 var INVALID_PLAYER_COUNT = 2;
 var INVALID_STEAM_ID = 3;
 var STEAM_ID_ALREADY_SET = 4;
+var STEAM_ID_NOT_SET = 5;
 var ERROR_LIST = [
 	'no error',
 	'invalid gametype',
 	'invalid player count (must be even)',
 	'invalid steam id',
-	'steam id already set. use /force_map method'
+	'steam id already set. use /force_map method',
+	'undefined steam id'
 ];
 
 var removeColorsFromQLNickname = function(name) {
@@ -30,27 +33,59 @@ var removeColorsFromQLNickname = function(name) {
 };
 
 var GetPlayerSummaries = function(steamids, done, fuck) {
-	var params = {
-		host: "api.steampowered.com",
-		port: 80,
-		path: '/ISteamUser/GetPlayerSummaries/v0002/?key=' + steamApiKey + '&steamids=' + steamids
-	};
+	var url = 'http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=' + steamApiKey + '&steamids=' + steamids;
 	
-	http.get(params, function(response) {
-		var data = "";
-		response.on("data", function(chunk) {
-			data += chunk;
-		});
-		response.on("end", function() {
-			try {
-				data = JSON.parse(data);
-				done(data);
-			} catch(yourself) {
-				fuck(yourself);
+	request(url, {timeout: 3000}, function (error, response, body) {
+		if (error) {
+			fuck(error);
+		} else {
+			if (response.statusCode != 200) {
+				fuck({message: "statustCode: " + response.statusCode.toString()});
+			} else {
+				try {
+					done(JSON.parse(body));
+				} catch(yourself) {
+					fuck(yourself);
+				}
 			}
-		});
-	}).on('error', fuck);
+		}
+	});
 };
+
+
+var getSteamId = function(discordId, done) {
+	if (typeof(d2s[discordId]) == 'undefined') {
+		done({
+			"ok": false,
+			"error_code": STEAM_ID_NOT_SET,
+			"error_msg": ERROR_LIST[STEAM_ID_NOT_SET]
+		});
+	} else {
+		var steamId = d2s[discordId];
+		GetPlayerSummaries(steamId, function(data) {
+			if (data.response.players.length == 0) {
+				done({
+					"ok": false,
+					"error_code": INVALID_STEAM_ID,
+					"error_msg": ERROR_LIST[INVALID_STEAM_ID]
+				});
+			} else {
+				done({
+					ok: true,
+					steamid: steamId,
+					steamname: removeColorsFromQLNickname(data.response.players[0].personaname)
+				});
+			}
+		}, function(error) {
+			done({
+				"ok": false,
+				"error_code": -1,
+				"error_msg": error.toString()
+			});
+		});
+	}
+};
+
 
 var setSteamId = function(discordId, steamId, done) {
 	// если что-то пойдет не так
@@ -282,3 +317,4 @@ var shuffle = function(gametype, playerList, done) {
 module.exports.shuffle = shuffle;
 module.exports.setSteamId = setSteamId;
 module.exports.setSteamIdPrimary = setSteamIdPrimary;
+module.exports.getSteamId = getSteamId
