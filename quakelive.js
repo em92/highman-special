@@ -11,13 +11,15 @@ var INVALID_PLAYER_COUNT = 2;
 var INVALID_STEAM_ID = 3;
 var STEAM_ID_ALREADY_SET = 4;
 var STEAM_ID_NOT_SET = 5;
+var GET_PLAYER_SUMMARIES_ERROR = 6;
 var ERROR_LIST = [
 	'no error',
 	'invalid gametype',
 	'invalid player count (must be even)',
 	'invalid steam id',
 	'steam id already set. use /force_map method',
-	'undefined steam id'
+	'undefined steam id',
+	'error in GetPlayerSummaries: '
 ];
 
 var removeColorsFromQLNickname = function(name) {
@@ -152,13 +154,20 @@ var shuffle = function(gametype, playerList, done) {
 			response.on("end", function() {
 				data = JSON.parse(data);
 				playerList.forEach(function(item, i, a) {
-					a[i].elo = 0;
-					a[i].steamname = "noname";
+					if (item.steamid != "0") {
+						a[i].elo = 1;
+						a[i].steamname = steamNames[item.steamid];
+						
+					} else {
+						a[i].elo = 0;
+						a[i].steamname = "noname";
+					}
+					a[i].games = 0;
 					data.players.forEach(function(jtem) {
 						if (jtem.steamid == item.steamid) {
 							if (typeof(jtem[gametype]) != 'undefined') {
 								a[i].elo = jtem[gametype].elo;
-								a[i].steamname = steamNames[item.steamid];
+								a[i].games = jtem[gametype].games;
 							}
 						}
 					});
@@ -296,11 +305,15 @@ var shuffle = function(gametype, playerList, done) {
 		
 		var onGetPlayerSummariesError = function(error) {
 			console.error("error in GetPlayerSummaries: " + error.message);
-			GetPlayerSummaries(Object.keys(steamNames), GetPlayerSummariesCallback, onGetPlayerSummariesError);
+			done({
+				"ok": false,
+				"error_code": GET_PLAYER_SUMMARIES_ERROR,
+				"error_msg": ERROR_LIST[GET_PLAYER_SUMMARIES_ERROR] + ": " + error.message
+			});
 		};
 		
 		// поехали
-		GetPlayerSummaries(Object.keys(steamNames), GetPlayerSummariesCallback, onGetPlayerSummariesError);
+		GetPlayerSummaries(Object.keys(steamNames).join(), GetPlayerSummariesCallback, onGetPlayerSummariesError);
 		
 	} else {
 		done({
