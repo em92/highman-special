@@ -142,7 +142,14 @@ var getRatingsForDiscordId = function(discordId, done) {
 	
 	return getRatingsForSteamIds(steamId)
 	.then( data => {
-		done( extend({ ok: true }, data[steamId]) );
+		var stats = GAMETYPES_AVAILABLE.map(gametype => {
+			return {
+				type: gametype,
+				rating: data[steamId][gametype].rating,
+				games: data[steamId][gametype].games
+			};
+		});
+		done( { ok: true, stats: stats } );
 	})
 	.catch( templateErrorCallback(done) );
 };
