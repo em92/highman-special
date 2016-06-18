@@ -27,6 +27,7 @@ app.use(morgan('combined', {
 app.get('/shuffle/:gametype/:discord_ids', function (req, res) {
 	ql.shuffle(req.params.gametype.toLowerCase(), convertDiscordIdsToArray(req.params.discord_ids), function(result) {
 		res.setHeader("Content-Type", "application/json");
+		res.setHeader("Connection", "close");
 		res.send(result);
 	});
 });
@@ -34,6 +35,7 @@ app.get('/shuffle/:gametype/:discord_ids', function (req, res) {
 app.get('/map/:discord_id/:steam_id', function (req, res) {
 	ql.setSteamIdPrimary(req.params.discord_id, req.params.steam_id, function(result) {
 		res.setHeader("Content-Type", "application/json");
+		res.setHeader("Connection", "close");
 		res.send(result);
 	});
 });
@@ -41,6 +43,7 @@ app.get('/map/:discord_id/:steam_id', function (req, res) {
 app.get('/force_map/:discord_id/:steam_id', function (req, res) {
 	ql.setSteamId(req.params.discord_id, req.params.steam_id, function(result) {
 		res.setHeader("Content-Type", "application/json");
+		res.setHeader("Connection", "close");
 		res.send(result);
 	});
 });
@@ -48,6 +51,7 @@ app.get('/force_map/:discord_id/:steam_id', function (req, res) {
 app.get('/whois/:discord_id', function (req, res) {
 	ql.getSteamId(req.params.discord_id, function(result) {
 		res.setHeader("Content-Type", "application/json");
+		res.setHeader("Connection", "close");
 		res.send(result);
 	});
 });
@@ -55,6 +59,7 @@ app.get('/whois/:discord_id', function (req, res) {
 app.get('/ratings/:discord_id', function (req, res) {
 	ql.getRatingsForDiscordId(req.params.discord_id, function(result) {
 		res.setHeader("Content-Type", "application/json");
+		res.setHeader("Connection", "close");
 		res.send(result);
 	});
 });
