@@ -282,8 +282,8 @@ var shuffle = function(gametype, playerList, done) {
 					}
 					return sum;
 				}, [
-						{name: "blue",		team_elo: 0,	players: []},
 						{name: "red",		team_elo: 0,	players: []},
+						{name: "blue",		team_elo: 0,	players: []},
 						{name: "unrated",	team_elo: 0,	players: []}
 					]
 				);
@@ -315,7 +315,7 @@ var shuffle = function(gametype, playerList, done) {
 			return b.elo - a.elo;
 		};
 		bestCombo[0].players.sort(sortByEloCallback);
-		bestCombo[1].team_elo = parseFloat((bestCombo[0].team_elo/teamsize).toFixed(2));
+		bestCombo[0].team_elo = parseFloat((bestCombo[0].team_elo/teamsize).toFixed(2));
 		bestCombo[1].players.sort(sortByEloCallback);
 		bestCombo[1].team_elo = parseFloat((bestCombo[1].team_elo/teamsize).toFixed(2));
 		
