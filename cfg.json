@@ -1,5 +1,5 @@
 {
 	"httpd_port": 3330,
-	"steamApiKey": "your steam api key here",
-	"ratingApiSource": "qlstats.net:8080"
+	"steamApiKey": "YOUR_STEAM_WEB_API_KEY_HERE",
+	"ratingApiSource": "http://qlstats.net:8080/elo_b/"
 }
