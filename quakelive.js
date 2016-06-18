@@ -1,10 +1,13 @@
-var http = require('http');
 var fs = require('fs');
 var extend = require('util')._extend;
 var d2s = require('./d2s.json');
-var steamApiKey = require('./cfg.json').steamApiKey;
-var request = require('request');
+var rp = require('request-promise');
+var Q = require('q');
 
+var steamApiKey = require('./cfg.json').steamApiKey;
+var ratingApiSource = require('./cfg.json').ratingApiSource;
+
+var GAMETYPES_AVAILABLE = ['ctf', 'tdm'];
 var NO_ERROR = 0;
 var INVALID_GAMETYPE = 1;
 var INVALID_PLAYER_COUNT = 2;
@@ -34,91 +37,139 @@ var removeColorsFromQLNickname = function(name) {
 	return name;
 };
 
-var GetPlayerSummaries = function(steamids, done, fuck) {
-	var url = 'http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=' + steamApiKey + '&steamids=' + steamids;
-	
-	request(url, {timeout: 3000}, function (error, response, body) {
-		if (error) {
-			fuck(error);
-		} else {
-			if (response.statusCode != 200) {
-				fuck({message: "statustCode: " + response.statusCode.toString()});
-			} else {
-				try {
-					done(JSON.parse(body));
-				} catch(yourself) {
-					fuck(yourself);
-				}
-			}
-		}
+var GetPlayerSummaries = function(steamids) {
+	if (steamids instanceof Array) steamids = steamids.join(",");
+	return rp({
+		uri: 'http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=' + steamApiKey + '&steamids=' + steamids,
+		timeout: 3000,
+		json: true
+	})
+	.catch( error => {
+		throw {
+			error_code: GET_PLAYER_SUMMARIES_ERROR,
+			error_msg: error.message
+		};
 	});
+};
+
+
+var getRatingsForSteamIds = function(steamids) {
+	if (steamids instanceof Array) steamids = steamids.join("+");
+	return rp({
+		uri: ratingApiSource + steamids,
+		timeout: 3000,
+		json: true
+	})
+	.then( data => {
+		
+		var result = {};
+		steamids.split("+").forEach(steamid => {
+			result[steamid] = {};
+			GAMETYPES_AVAILABLE.forEach(gametype => {
+				result[steamid][gametype] = {rating: 1, games: 0};
+			});
+		});
+		
+		data.players.forEach( player => {
+			GAMETYPES_AVAILABLE.forEach( gametype => {
+				if (typeof(player[gametype]) != 'undefined') {
+					result[player.steamid][gametype].rating = player[gametype].elo;
+					result[player.steamid][gametype].games = player[gametype].games;
+				}
+			});
+		});
+		
+		// { "76561198002515349": { "ctf": { "games": 10, "rating": 20.10 }, "tdm": { "games": 20, "rating": 30.10 } }
+		return result;
+	});
+};
+
+
+var templateErrorCallback = function(done) {
+	return function(error) {
+		if (error.message) {
+			done({
+				ok: false,
+				error_code: -1,
+				error_msg: error.message
+			});
+		} else {
+			done(extend({ok: false}, error));
+		};
+	};
 };
 
 
 var getSteamId = function(discordId, done) {
 	if (typeof(d2s[discordId]) == 'undefined') {
 		done({
-			"ok": false,
-			"error_code": STEAM_ID_NOT_SET,
-			"error_msg": ERROR_LIST[STEAM_ID_NOT_SET]
+			ok: false,
+			error_code: STEAM_ID_NOT_SET,
+			error_msg: ERROR_LIST[STEAM_ID_NOT_SET]
 		});
-	} else {
-		var steamId = d2s[discordId];
-		GetPlayerSummaries(steamId, function(data) {
-			if (data.response.players.length == 0) {
-				done({
-					"ok": false,
-					"error_code": INVALID_STEAM_ID,
-					"error_msg": ERROR_LIST[INVALID_STEAM_ID]
-				});
-			} else {
-				done({
-					ok: true,
-					steamid: steamId,
-					steamname: removeColorsFromQLNickname(data.response.players[0].personaname)
-				});
-			}
-		}, function(error) {
-			done({
-				"ok": false,
-				"error_code": -1,
-				"error_msg": error.toString()
-			});
-		});
+		return;
 	}
+	
+	var steamId = d2s[discordId];
+	
+	return GetPlayerSummaries(steamId)
+	.then( data => {
+		if (data.response.players.length == 0) throw {
+			error_code: INVALID_STEAM_ID,
+			error_msg: ERROR_LIST[INVALID_STEAM_ID]
+		};
+		done({
+			ok: true,
+			steamid: steamId,
+			steamname: removeColorsFromQLNickname(data.response.players[0].personaname)
+		});
+	})
+	.catch( templateErrorCallback(done) );
+};
+
+
+var getRatingsForDiscordId = function(discordId, done) {
+	if (typeof(d2s[discordId]) == 'undefined') {
+		done({
+			ok: false,
+			error_code: STEAM_ID_NOT_SET,
+			error_msg: ERROR_LIST[STEAM_ID_NOT_SET]
+		});
+		return;
+	}
+	
+	var steamId = d2s[discordId];
+	
+	return getRatingsForSteamIds(steamId)
+	.then( data => {
+		done( extend({ ok: true }, data[steamId]) );
+	})
+	.catch( templateErrorCallback(done) );
 };
 
 
 var setSteamId = function(discordId, steamId, done) {
-	// если что-то пойдет не так
-	var fuck = function(err) {
-		done({
-			"ok": false,
-			"error_code": -1,
-			"error_msg": err.toString()
-		});
-	};
-	
 	// сначала проверяем валидности steamId
 	// и определяем ник в стиме
-	GetPlayerSummaries(steamId, function(data) {
-		if (data.response.players.length == 0) {
+	GetPlayerSummaries(steamId)
+	.then( data => {
+		if (data.response.players.length == 0)
+			throw {
+				error_code: INVALID_STEAM_ID,
+				error_msg: ERROR_LIST[INVALID_STEAM_ID]
+			};
+		
+		d2s[discordId] = steamId;
+		// writeFile не возвращает промис, поэтому пишем так
+		fs.writeFile("./d2s.json", JSON.stringify(d2s), function(error) {
+			if (error) throw error;
 			done({
-				"ok": false,
-				"error_code": INVALID_STEAM_ID,
-				"error_msg": ERROR_LIST[INVALID_STEAM_ID]
+				ok: true,
+				steamname: removeColorsFromQLNickname(data.response.players[0].personaname)
 			});
-		} else {
-			d2s[discordId] = steamId;
-			fs.writeFile("./d2s.json", JSON.stringify(d2s), function(err) {
-				if (err) fuck(err);
-				done({
-					ok: true,
-					steamname: removeColorsFromQLNickname(data.response.players[0].personaname)
-				});
-			});
-		}
-	}, fuck);
+		});
+	})
+	.catch( templateErrorCallback(done) );
 };
 
 
@@ -127,9 +178,9 @@ var setSteamIdPrimary = function(discordId, steamId, done) {
 		setSteamId(discordId, steamId, done);
 	} else {
 		done({
-			"ok": false,
-			"error_code": STEAM_ID_ALREADY_SET,
-			"error_msg": ERROR_LIST[STEAM_ID_ALREADY_SET]
+			ok: false,
+			error_code: STEAM_ID_ALREADY_SET,
+			error_msg: ERROR_LIST[STEAM_ID_ALREADY_SET]
 		});
 	}
 };
@@ -141,47 +192,59 @@ var shuffle = function(gametype, playerList, done) {
 	var playercount = Object.keys(playerList).length;
 	var steamNames = {};
 	
-	// метод получения рейтинга
-	var getRatings = function(done, fuck) {
-		var path = '/elo_b/' + playerList.reduce(function(sum, current) {
-			return sum + (sum != '' ? '+': '') + current.steamid;
-		}, '');
-		http.get({host: 'qlstats.net', port: 8080, path: path}, function(response) {
-			var data = "";
-			response.on("data", function(chunk) {
-				data += chunk;
-			});
-			response.on("end", function() {
-				data = JSON.parse(data);
-				playerList.forEach(function(item, i, a) {
-					if (item.steamid != "0") {
-						a[i].elo = 1;
-						a[i].steamname = steamNames[item.steamid];
-						
-					} else {
-						a[i].elo = 0;
-						a[i].steamname = "noname";
-					}
-					a[i].games = 0;
-					data.players.forEach(function(jtem) {
-						if (jtem.steamid == item.steamid) {
-							if (typeof(jtem[gametype]) != 'undefined') {
-								a[i].elo = jtem[gametype].elo;
-								a[i].games = jtem[gametype].games;
-							}
-						}
-					});
-				});
-				done();
-
-			});
-		}).on('error', function(yourself) {
-			fuck(yourself);
+	Q()
+	.then( () => {
+		if ( GAMETYPES_AVAILABLE.some( item => { return gametype == item } ) == false )
+			throw {
+				error_code: INVALID_GAMETYPE,
+				error_msg: ERROR_LIST[INVALID_GAMETYPE] + ": " + gametype
+			};
+		
+		// принимаем четное количество игроков
+		if ( playercount%2 != 0 )
+			throw {
+				error_code: INVALID_PLAYER_COUNT,
+				error_msg: ERROR_LIST[INVALID_PLAYER_COUNT]
+			};
+		
+		// для каждого определим steamId
+		playerList = playerList.map( player => {
+			if (typeof(d2s[player.discordid]) == 'undefined') {
+				player.steamid = '0';
+			} else {
+				player.steamid = d2s[player.discordid];
+				steamNames[player.steamid] = "noname";
+			}
+			return player;
 		});
-	};
-
-	// метод разделения команд
-	var makeTeams = function() {
+		
+		return Object.keys(steamNames);
+	})
+	// сначала определяем ники
+	.then( GetPlayerSummaries )
+	.then( data => {
+		data.response.players.forEach(function(player) {
+			steamNames[player.steamid] = removeColorsFromQLNickname(player.personaname);
+		});
+		return Object.keys(steamNames);
+	})
+	.then( getRatingsForSteamIds )
+	.then( data => {
+		playerList = playerList.map( player => {
+			if (player.steamid != '0') {
+				player.elo = data[player.steamid][gametype].rating;
+				player.games = data[player.steamid][gametype].games;
+				player.steamname = steamNames[player.steamid];
+			} else {
+				player.elo = 0;
+				player.games = 0;
+				player.steamname = "noname";
+			}
+			return player;
+		});
+		
+		// собственно разделяем команды
+		
 		var bestCombo;
 		var bestDiff = Number.MAX_VALUE;
 		
@@ -252,82 +315,21 @@ var shuffle = function(gametype, playerList, done) {
 			return b.elo - a.elo;
 		};
 		bestCombo[0].players.sort(sortByEloCallback);
-		bestCombo[0].team_elo = parseInt(bestCombo[0].team_elo/teamsize);
+		bestCombo[1].team_elo = parseFloat((bestCombo[0].team_elo/teamsize).toFixed(2));
 		bestCombo[1].players.sort(sortByEloCallback);
-		bestCombo[1].team_elo = parseInt(bestCombo[1].team_elo/teamsize);
+		bestCombo[1].team_elo = parseFloat((bestCombo[1].team_elo/teamsize).toFixed(2));
 		
 		done({
-			"ok": true,
-			"teams": bestCombo
+			ok: true,
+			teams: bestCombo
 		});
-	};
-	
-	// основной метод
-	
-	// принимаем четное количество игроков
-	if (playercount%2 != 0) {
-		done({
-			"ok": false,
-			"error_code": INVALID_PLAYER_COUNT,
-			"error_msg": ERROR_LIST[INVALID_PLAYER_COUNT]
-		});
-		return;
-	}
-	
-	if ( (gametype == 'tdm') || (gametype == 'ctf') ) {
-		
-		// для каждого определим steamId
-		playerList = playerList.map(function(player) {
-			if (typeof(d2s[player.discordid]) == 'undefined') {
-				player.steamid = '0';
-			} else {
-				player.steamid = d2s[player.discordid];
-				steamNames[player.steamid] = "noname";
-			}
-			return player;
-		});
-		
-		// для получения ников со стима
-		var GetPlayerSummariesCallback = function(data) {
-			
-			data.response.players.forEach(function(player) {
-				steamNames[player.steamid] = removeColorsFromQLNickname(player.personaname);
-			});
-			
-			// если не получится получить рейтинги
-			var onGetRatingsError = function(error) {
-				console.error('http error in getRatings: ' + error.message);
-				getRatings(makeTeams, onGetRatingsError);
-			}
-			
-			getRatings(makeTeams, onGetRatingsError);
-		};
-		
-		var onGetPlayerSummariesError = function(error) {
-			console.error("error in GetPlayerSummaries: " + error.message);
-			done({
-				"ok": false,
-				"error_code": GET_PLAYER_SUMMARIES_ERROR,
-				"error_msg": ERROR_LIST[GET_PLAYER_SUMMARIES_ERROR] + ": " + error.message
-			});
-		};
-		
-		// поехали
-		GetPlayerSummaries(Object.keys(steamNames).join(), GetPlayerSummariesCallback, onGetPlayerSummariesError);
-		
-	} else {
-		done({
-			"ok": false,
-			"error_code": INVALID_GAMETYPE,
-			"error_msg": ERROR_LIST[INVALID_GAMETYPE] + ": " + gametype
-		});
-		return;
-	}
-
+	})
+	.catch( templateErrorCallback(done) );
 };
 
 
 module.exports.shuffle = shuffle;
 module.exports.setSteamId = setSteamId;
 module.exports.setSteamIdPrimary = setSteamIdPrimary;
-module.exports.getSteamId = getSteamId
+module.exports.getSteamId = getSteamId;
+module.exports.getRatingsForDiscordId = getRatingsForDiscordId;
