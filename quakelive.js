@@ -75,6 +75,7 @@ var getRatingsForSteamIds = function(steamids) {
 				if (typeof(player[gametype]) != 'undefined') {
 					result[player.steamid][gametype].rating = player[gametype].elo;
 					result[player.steamid][gametype].games = player[gametype].games;
+					result[player.steamid][gametype].history = player[gametype].history;
 				}
 			});
 		});
