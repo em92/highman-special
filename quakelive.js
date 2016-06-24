@@ -147,7 +147,8 @@ var getRatingsForDiscordId = function(discordId, done) {
 			return {
 				type: gametype,
 				rating: data[steamId][gametype].rating,
-				games: data[steamId][gametype].games
+				games: data[steamId][gametype].games,
+				history: data[steamId][gametype].history,
 			};
 		});
 		done( { ok: true, stats: stats } );
