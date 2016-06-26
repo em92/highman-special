@@ -222,7 +222,7 @@ var shuffle = function(gametype, playerList, done) {
 				player.steamid = '0';
 			} else {
 				player.steamid = d2s[player.discordid];
-				steamNames[player.steamid] = "noname";
+				steamNames[player.steamid] = "";
 			}
 			return player;
 		});
@@ -247,7 +247,7 @@ var shuffle = function(gametype, playerList, done) {
 			} else {
 				player.elo = 0;
 				player.games = 0;
-				player.steamname = "noname";
+				player.steamname = "";
 			}
 			return player;
 		});
