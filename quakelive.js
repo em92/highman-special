@@ -66,7 +66,7 @@ var getRatingsForSteamIds = function(steamids) {
 		steamids.split("+").forEach(steamid => {
 			result[steamid] = {};
 			GAMETYPES_AVAILABLE.forEach(gametype => {
-				result[steamid][gametype] = {rating: 1, games: 0, history: []};
+				result[steamid][gametype] = {rating: 1, games: 0};
 			});
 		});
 		
@@ -75,12 +75,11 @@ var getRatingsForSteamIds = function(steamids) {
 				if (typeof(player[gametype]) != 'undefined') {
 					result[player.steamid][gametype].rating = player[gametype].elo;
 					result[player.steamid][gametype].games = player[gametype].games;
-					result[player.steamid][gametype].history = player[gametype].history.reverse();
 				}
 			});
 		});
 		
-		// { "76561198002515349": { "ctf": { "games": 10, "rating": 20.10, "history": [...] }, "tdm": { "games": 20, "rating": 30.10, history: [...] } }
+		// { "76561198002515349": { "ctf": { "games": 10, "rating": 20.10 }, "tdm": { "games": 20, "rating": 30.10 } }
 		return result;
 	});
 };
