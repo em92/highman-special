@@ -1,4 +1,5 @@
 {
 	"httpd_port": 3331,
-	"ratingApiSource": "http://localhost:7081/elo/"
+	"ratingApiSource": "http://localhost:7081/elo/",
+	"playerInfoApi": "http://localhost:7081/player/"
 }
