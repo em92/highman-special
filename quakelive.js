@@ -168,7 +168,7 @@ var getRatingsForDiscordId = function(discordId, done) {
 							item.change = -1;
 						}
 						return item;
-					}).reverse();
+					}).slice(-3).reverse();
 				}
 			} else {
 				result[gametype].rating = 1;
