@@ -6,6 +6,7 @@ var Q = require('q');
 
 var steamApiKey = process.env['STEAM_WEB_API_KEY'];
 var ratingApiSource = require('./cfg.json').ratingApiSource;
+var playerInfoApi = require('./cfg.json').playerInfoApi;
 
 var GAMETYPES_AVAILABLE = ['ctf', 'tdm'];
 var NO_ERROR = 0;
@@ -140,14 +141,48 @@ var getRatingsForDiscordId = function(discordId, done) {
 	
 	var steamId = d2s[discordId];
 	
-	return getRatingsForSteamIds(steamId)
+	return rp({
+		uri: playerInfoApi + steamId,
+		timeout: 3000,
+		json: true
+	})
 	.then( data => {
+		
+		var player = data.player;
+		var result = {};
+		GAMETYPES_AVAILABLE.forEach( gametype => {
+			result[gametype] = {};
+			if (typeof(player[gametype]) != 'undefined') {
+				result[gametype].rating = player[gametype].rating;
+				result[gametype].games = player[gametype].n;
+				if (typeof(player[gametype].history) == "undefined") {
+					result[gametype].history = [];
+				} else {
+					var history = player[gametype].history.slice(-4);
+					result[gametype].history = history.map( (item, i) => {
+						if (i == 0) {
+							item.change = 0;
+						} else if (history[i-1].rating < history[i].rating) {
+							item.change = 1;
+						} else {
+							item.change = -1;
+						}
+						return item;
+					}).reverse();
+				}
+			} else {
+				result[gametype].rating = 1;
+				result[gametype].games = 0;
+				result[gametype].history = [];
+			}
+		});
+		
 		var stats = GAMETYPES_AVAILABLE.map(gametype => {
 			return {
 				type: gametype,
-				rating: data[steamId][gametype].rating,
-				games: data[steamId][gametype].games,
-				history: data[steamId][gametype].history,
+				rating: result[gametype].rating,
+				games: result[gametype].games,
+				history: result[gametype].history,
 			};
 		});
 		done( { ok: true, stats: stats } );
