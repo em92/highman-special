@@ -4,7 +4,7 @@ var d2s = require('./d2s.json');
 var rp = require('request-promise');
 var Q = require('q');
 
-var steamApiKey = require('./cfg.json').steamApiKey;
+var steamApiKey = process.env['STEAM_WEB_API_KEY'];
 var ratingApiSource = require('./cfg.json').ratingApiSource;
 
 var GAMETYPES_AVAILABLE = ['ctf', 'tdm'];
@@ -66,7 +66,7 @@ var getRatingsForSteamIds = function(steamids) {
 		steamids.split("+").forEach(steamid => {
 			result[steamid] = {};
 			GAMETYPES_AVAILABLE.forEach(gametype => {
-				result[steamid][gametype] = {rating: 1, games: 0};
+				result[steamid][gametype] = {rating: 1, games: 0, history: []};
 			});
 		});
 		
@@ -75,12 +75,12 @@ var getRatingsForSteamIds = function(steamids) {
 				if (typeof(player[gametype]) != 'undefined') {
 					result[player.steamid][gametype].rating = player[gametype].elo;
 					result[player.steamid][gametype].games = player[gametype].games;
-					result[player.steamid][gametype].history = player[gametype].history;
+					result[player.steamid][gametype].history = player[gametype].history.reverse();
 				}
 			});
 		});
 		
-		// { "76561198002515349": { "ctf": { "games": 10, "rating": 20.10 }, "tdm": { "games": 20, "rating": 30.10 } }
+		// { "76561198002515349": { "ctf": { "games": 10, "rating": 20.10, "history": [...] }, "tdm": { "games": 20, "rating": 30.10, history: [...] } }
 		return result;
 	});
 };
