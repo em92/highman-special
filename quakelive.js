@@ -175,8 +175,10 @@ var getRatingsForDiscordId = function(discordId, done) {
 							item.rank_change = 0;
 						} else if (history[i-1].rank < history[i].rank) {
 							item.rank_change = 1;
-						} else {
+						} else if (history[i-1].rank > history[i].rank) {
 							item.rank_change = -1;
+						} else {
+							item.rank_change = 0;
 						}
 						return item;
 					}).slice(-3).reverse();
