@@ -257,7 +257,6 @@ var topList = function(gametype, done) {
       player.steam_id = player._id;
       delete player.n;
       delete player._id;
-      delete player.rank;
       return player;
     });
     delete item.ok;
