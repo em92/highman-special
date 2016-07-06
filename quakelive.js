@@ -255,6 +255,7 @@ var topList = function(gametype, done) {
     item = item.response.map( player => {
       player.games = player.n;
       player.steam_id = player._id;
+      player.name = removeColorsFromQLNickname(player.name);
       delete player.n;
       delete player._id;
       return player;
