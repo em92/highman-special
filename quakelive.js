@@ -252,16 +252,13 @@ var topList = function(gametype, done) {
   .then( item => {
     if (item.ok == false) throw new Error(item.message);
     
-    item.players = item.response.map( player => {
+    item = item.response.map( player => {
       player.games = player.n;
       player.steam_id = player._id;
       delete player.n;
       delete player._id;
       return player;
     });
-    delete item.ok;
-    delete item.response;
-    delete item.page_count;
     
     done({ok: true, response: item});
     
