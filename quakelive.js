@@ -160,7 +160,7 @@ var getRatingsForDiscordId = function(discordId, done) {
 				} else {
 					var history = player[gametype].history.slice(-4);
 					result[gametype].history = history.map( (item, i) => {
-						if (item.rank) {
+						if ( (item.rank) || (item.rank==null) ) {
 							item.rank = 0;
 						}
 						if (i == 0) {
