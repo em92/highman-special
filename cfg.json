@@ -1,5 +1,6 @@
 {
 	"httpd_port": 3331,
 	"ratingApiSource": "http://localhost:7081/elo/",
+	"topListApi": "http://localhost:7081/rating/",
 	"playerInfoApi": "http://localhost:7081/player/"
 }
