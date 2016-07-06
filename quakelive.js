@@ -160,12 +160,23 @@ var getRatingsForDiscordId = function(discordId, done) {
 				} else {
 					var history = player[gametype].history.slice(-4);
 					result[gametype].history = history.map( (item, i) => {
+						if (typeof(item.rank) == 'undefined') {
+							item.rank = 0;
+						}
 						if (i == 0) {
 							item.change = 0;
 						} else if (history[i-1].rating < history[i].rating) {
 							item.change = 1;
 						} else {
 							item.change = -1;
+						}
+						
+						if (i == 0) {
+							item.rank_change = 0;
+						} else if (history[i-1].rank < history[i].rank) {
+							item.rank_change = 1;
+						} else {
+							item.rank_change = -1;
 						}
 						return item;
 					}).slice(-3).reverse();
