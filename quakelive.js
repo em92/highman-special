@@ -7,6 +7,7 @@ var Q = require('q');
 var steamApiKey = process.env['STEAM_WEB_API_KEY'];
 var ratingApiSource = require('./cfg.json').ratingApiSource;
 var playerInfoApi = require('./cfg.json').playerInfoApi;
+var topListApi = require('./cfg.json').topListApi;
 
 var GAMETYPES_AVAILABLE = ['ctf', 'tdm'];
 var NO_ERROR = 0;
@@ -242,6 +243,39 @@ var setSteamIdPrimary = function(discordId, steamId, done) {
 };
 
 
+var topList = function(done) {
+  Q.all(GAMETYPES_AVAILABLE.map( gametype => {
+    return rp({
+      uri: topListApi + gametype + "/0",
+      timeout: 3000,
+      json: true
+    })
+  }))
+  .then( data => {
+    var result = data.map( (item, i) => {
+      if (item.ok == false) throw new Error(item.message);
+      
+      item.players = item.response.map( player => {
+        player.games = player.n;
+        player.steam_id = player._id;
+        delete player.n;
+        delete player._id;
+        delete player.rank;
+        return player;
+      });
+      item.type = GAMETYPES_AVAILABLE[i];
+      delete item.ok;
+      delete item.response;
+      delete item.page_count;
+      return item;
+    });
+    
+    done({ok: true, top: result});
+  })
+  .catch( templateErrorCallback(done) );
+};
+
+
 var shuffle = function(gametype, playerList, done) {
 	
 	var teamsize = parseInt(Object.keys(playerList).length / 2);
@@ -389,3 +423,4 @@ module.exports.setSteamId = setSteamId;
 module.exports.setSteamIdPrimary = setSteamIdPrimary;
 module.exports.getSteamId = getSteamId;
 module.exports.getRatingsForDiscordId = getRatingsForDiscordId;
+module.exports.topList = topList;

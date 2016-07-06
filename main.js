@@ -64,6 +64,14 @@ app.get('/ratings/:discord_id', function (req, res) {
 	});
 });
 
+app.get('/top', function (req, res) {
+	ql.topList(function(result) {
+		res.setHeader("Content-Type", "application/json");
+		res.setHeader("Connection", "close");
+		res.send(result);
+	});
+});
+
 
 app.listen(httpd_port, function () {
 	console.log("privet, pupsik :3");
