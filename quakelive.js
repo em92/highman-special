@@ -243,34 +243,29 @@ var setSteamIdPrimary = function(discordId, steamId, done) {
 };
 
 
-var topList = function(done) {
-  Q.all(GAMETYPES_AVAILABLE.map( gametype => {
-    return rp({
-      uri: topListApi + gametype + "/0",
-      timeout: 3000,
-      json: true
-    })
-  }))
-  .then( data => {
-    var result = data.map( (item, i) => {
-      if (item.ok == false) throw new Error(item.message);
-      
-      item.players = item.response.map( player => {
-        player.games = player.n;
-        player.steam_id = player._id;
-        delete player.n;
-        delete player._id;
-        delete player.rank;
-        return player;
-      });
-      item.type = GAMETYPES_AVAILABLE[i];
-      delete item.ok;
-      delete item.response;
-      delete item.page_count;
-      return item;
-    });
+var topList = function(gametype, done) {
+  rp({
+    uri: topListApi + gametype + "/0",
+    timeout: 3000,
+    json: true
+  })
+  .then( item => {
+    if (item.ok == false) throw new Error(item.message);
     
-    done({ok: true, top: result});
+    item.players = item.response.map( player => {
+      player.games = player.n;
+      player.steam_id = player._id;
+      delete player.n;
+      delete player._id;
+      delete player.rank;
+      return player;
+    });
+    delete item.ok;
+    delete item.response;
+    delete item.page_count;
+    
+    done({ok: true, response: item});
+    
   })
   .catch( templateErrorCallback(done) );
 };

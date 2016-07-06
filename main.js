@@ -64,8 +64,8 @@ app.get('/ratings/:discord_id', function (req, res) {
 	});
 });
 
-app.get('/top', function (req, res) {
-	ql.topList(function(result) {
+app.get('/top/:gametype', function (req, res) {
+	ql.topList(req.params.gametype, function(result) {
 		res.setHeader("Content-Type", "application/json");
 		res.setHeader("Connection", "close");
 		res.send(result);
