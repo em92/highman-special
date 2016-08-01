@@ -148,7 +148,6 @@ var getRatingsForDiscordId = function(discordId, done) {
 		json: true
 	})
 	.then( data => {
-		
 		var player = data.player;
 		var result = {};
 		GAMETYPES_AVAILABLE.forEach( gametype => {
@@ -161,7 +160,7 @@ var getRatingsForDiscordId = function(discordId, done) {
 				} else {
 					var history = player[gametype].history.slice(-4);
 					result[gametype].history = history.map( (item, i) => {
-						if ( (item.rank) || (item.rank==null) ) {
+						if ( !(item.rank) || (item.rank==null) ) {
 							item.rank = 0;
 						}
 						if (i == 0) {
