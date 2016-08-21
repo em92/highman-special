@@ -258,7 +258,7 @@ var topList = function(gametype, done) {
       delete player.n;
       delete player._id;
       return player;
-    });
+    }).slice(0, 10);
     
     done({ok: true, response: item});
     
