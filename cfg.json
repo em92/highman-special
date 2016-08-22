@@ -1,6 +1,7 @@
 {
-	"httpd_port": 3331,
-	"ratingApiSource": "http://localhost:7081/elo/",
-	"topListApi": "http://localhost:7081/rating/",
-	"playerInfoApi": "http://localhost:7081/player/"
+  "httpd_port": 3331,
+  "ratingApiSource": "http://vds2.eugene24.ru:7082/elo/",
+  "mapratingApiSource": "http://vds2.eugene24.ru:7082/elo_map/",
+  "topListApi": "http://vds2.eugene24.ru:7082/rating/",
+  "playerInfoApi": "http://vds2.eugene24.ru:7082/player/"
 }

@@ -8,6 +8,7 @@ var steamApiKey = process.env['STEAM_WEB_API_KEY'];
 var ratingApiSource = require('./cfg.json').ratingApiSource;
 var playerInfoApi = require('./cfg.json').playerInfoApi;
 var topListApi = require('./cfg.json').topListApi;
+var mapratingApiSource = require('./cfg.json').mapratingApiSource;
 
 var GAMETYPES_AVAILABLE = ['ctf', 'tdm'];
 var NO_ERROR = 0;
@@ -55,10 +56,10 @@ var GetPlayerSummaries = function(steamids) {
 };
 
 
-var getRatingsForSteamIds = function(steamids) {
+var getRatingsForSteamIds = function(steamids, gametype, mapname) {
 	if (steamids instanceof Array) steamids = steamids.join("+");
 	return rp({
-		uri: ratingApiSource + steamids,
+		uri: typeof(mapname) == "undefined" ? ratingApiSource + steamids : mapratingApiSource + gametype + "/" + mapname + "/" + steamids,
 		timeout: 3000,
 		json: true
 	})
@@ -267,7 +268,7 @@ var topList = function(gametype, done) {
 };
 
 
-var shuffle = function(gametype, playerList, done) {
+var shuffle = function(gametype, playerList, mapname, done) {
 	
 	var teamsize = parseInt(Object.keys(playerList).length / 2);
 	var playercount = Object.keys(playerList).length;
@@ -307,9 +308,8 @@ var shuffle = function(gametype, playerList, done) {
 		data.response.players.forEach(function(player) {
 			steamNames[player.steamid] = removeColorsFromQLNickname(player.personaname);
 		});
-		return Object.keys(steamNames);
+		return getRatingsForSteamIds(Object.keys(steamNames), gametype, mapname);
 	})
-	.then( getRatingsForSteamIds )
 	.then( data => {
 		playerList = playerList.map( player => {
 			if (player.steamid != '0') {
