@@ -25,7 +25,15 @@ app.use(morgan('combined', {
 }));
 
 app.get('/shuffle/:gametype/:discord_ids', function (req, res) {
-	ql.shuffle(req.params.gametype.toLowerCase(), convertDiscordIdsToArray(req.params.discord_ids), function(result) {
+	ql.shuffle(req.params.gametype.toLowerCase(), convertDiscordIdsToArray(req.params.discord_ids), undefined, function(result) {
+		res.setHeader("Content-Type", "application/json");
+		res.setHeader("Connection", "close");
+		res.send(result);
+	});
+});
+
+app.get('/shuffle_map/:map/:gametype/:discord_ids', function (req, res) {
+	ql.shuffle(req.params.gametype.toLowerCase(), convertDiscordIdsToArray(req.params.discord_ids), req.params.map.toLowerCase(), function(result) {
 		res.setHeader("Content-Type", "application/json");
 		res.setHeader("Connection", "close");
 		res.send(result);
