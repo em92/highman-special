@@ -124,6 +124,7 @@ var getSteamId = function(discordId, done) {
 		done({
 			ok: true,
 			steamid: steamId,
+			steamname_real: data.response.players[0].personaname,
 			steamname: removeColorsFromQLNickname(data.response.players[0].personaname)
 		});
 	})
