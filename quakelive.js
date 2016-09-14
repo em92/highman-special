@@ -91,6 +91,7 @@ var getRatingsForSteamIds = function(steamids, gametype, mapname) {
 var templateErrorCallback = function(done) {
 	return function(error) {
 		if (error.message) {
+			console.trace(error);
 			done({
 				ok: false,
 				error_code: -1,
