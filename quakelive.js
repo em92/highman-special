@@ -37,7 +37,7 @@ var removeColorsFromQLNickname = function(name) {
 	name = name.split("^5").join("");
 	name = name.split("^6").join("");
 	name = name.split("^7").join("");
-	return name;
+	return name == "" ? "_" : name;
 };
 
 var GetPlayerSummaries = function(steamids) {
@@ -246,6 +246,8 @@ var setSteamIdPrimary = function(discordId, steamId, done) {
 
 
 var topList = function(gametype, done) {
+  var result = [];
+
   rp({
     uri: topListApi + gametype + "/0",
     timeout: 3000,
@@ -254,18 +256,29 @@ var topList = function(gametype, done) {
   .then( item => {
     if (item.ok == false) throw new Error(item.message);
     
-    item = item.response.map( player => {
+    result = item.response.map( player => {
       player.games = player.n;
       player.steam_id = player._id;
       player.name = removeColorsFromQLNickname(player.name);
-      if (player.name == "") player.name = "_";
       delete player.n;
       delete player._id;
       return player;
     }).slice(0, 10);
-    
-    done({ok: true, response: item});
-    
+
+    return GetPlayerSummaries( result.map( player => {
+      return player.steam_id;
+    }));
+
+  })
+  .then( data => {
+    data.response.players.forEach( (player, i) => {
+      result.forEach( (_, j) => {
+        if (result[j].steam_id == player.steamid) {
+          result[j].name = removeColorsFromQLNickname(player.personaname);
+        }
+      });
+    });
+    done({ok: true, response: result});
   })
   .catch( templateErrorCallback(done) );
 };
