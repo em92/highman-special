@@ -11,6 +11,9 @@ var topListApi = require('./cfg.json').topListApi;
 var mapratingApiSource = require('./cfg.json').mapratingApiSource;
 
 var GAMETYPES_AVAILABLE = ['ctf', 'tdm'];
+var GAMETYPE_ALIASES = {
+  'tdm2v2': 'tdm'
+}
 var NO_ERROR = 0;
 var INVALID_GAMETYPE = 1;
 var INVALID_PLAYER_COUNT = 2;
@@ -292,6 +295,7 @@ var shuffle = function(gametype, playerList, mapname, done) {
 	
 	Q()
 	.then( () => {
+		if ( GAMETYPE_ALIASES[ gametype ] ) gametype = GAMETYPE_ALIASES[ gametype ];
 		if ( GAMETYPES_AVAILABLE.some( item => { return gametype == item } ) == false )
 			throw {
 				error_code: INVALID_GAMETYPE,
