@@ -12,6 +12,7 @@ var mapratingApiSource = require('./cfg.json').mapratingApiSource;
 
 var GAMETYPES_AVAILABLE = ['ctf', 'tdm'];
 var GAMETYPE_ALIASES = {
+  'ctf5v5': 'ctf',
   'tdm2v2': 'tdm'
 }
 var NO_ERROR = 0;
