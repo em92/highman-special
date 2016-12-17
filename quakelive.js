@@ -168,6 +168,8 @@ var getRatingsForDiscordId = function(discordId, done) {
 			if (typeof(player[gametype]) != 'undefined') {
 				result[gametype].rating = player[gametype].rating;
 				result[gametype].games = player[gametype].n;
+				result[gametype].rank = player[gametype].rank ? player[gametype].rank : 0;
+				result[gametype].max_rank = player[gametype].max_rank ? player[gametype].max_rank : 0;
 				if (typeof(player[gametype].history) == "undefined") {
 					result[gametype].history = [];
 				} else {
@@ -200,6 +202,8 @@ var getRatingsForDiscordId = function(discordId, done) {
 				result[gametype].rating = 1;
 				result[gametype].games = 0;
 				result[gametype].history = [];
+				result[gametype].rank = 0;
+				result[gametype].max_rank = 0;
 			}
 		});
 		
@@ -209,6 +213,8 @@ var getRatingsForDiscordId = function(discordId, done) {
 				rating: result[gametype].rating,
 				games: result[gametype].games,
 				history: result[gametype].history,
+				rank: result[gametype].rank,
+				max_rank: result[gametype].max_rank,
 			};
 		});
 		done( { ok: true, stats: stats } );
