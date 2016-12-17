@@ -1,7 +1,7 @@
 {
   "httpd_port": 3331,
-  "ratingApiSource": "http://vds2.eugene24.ru:7082/elo/",
-  "mapratingApiSource": "http://vds2.eugene24.ru:7082/elo_map/",
-  "topListApi": "http://vds2.eugene24.ru:7082/rating/",
-  "playerInfoApi": "http://vds2.eugene24.ru:7082/player/"
+  "ratingApiSource": "http://stats.eugenemolotov.ru/elo/",
+  "mapratingApiSource": "http://stats.eugenemolotov.ru/elo_map/",
+  "topListApi": "http://stats.eugenemolotov.ru/rating/",
+  "playerInfoApi": "http://stats.eugenemolotov.ru/player/"
 }
