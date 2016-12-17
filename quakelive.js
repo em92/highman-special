@@ -3,6 +3,7 @@ var extend = require('util')._extend;
 var d2s = require('./d2s.json');
 var rp = require('request-promise');
 var Q = require('q');
+var _ = require('lodash');
 
 var steamApiKey = process.env['STEAM_WEB_API_KEY'];
 var ratingApiSource = require('./cfg.json').ratingApiSource;
@@ -31,6 +32,11 @@ var ERROR_LIST = [
 	'undefined steam id',
 	'error in GetPlayerSummaries: '
 ];
+
+var getDiscordIdBySteamId = function(steam_id) {
+  var result = _.findKey(d2s, (item) => (item == steam_id));
+  return (typeof(result) != "undefined") ? result : 0;
+}
 
 var removeColorsFromQLNickname = function(name) {
 	name = name.split("^0").join("");
@@ -264,8 +270,10 @@ var topList = function(gametype, done) {
       player.games = player.n;
       player.steam_id = player._id;
       player.name = removeColorsFromQLNickname(player.name);
+      player.discord_id = getDiscordIdBySteamId(player._id);
       delete player.n;
       delete player._id;
+      delete player.model;
       return player;
     }).slice(0, 10);
 

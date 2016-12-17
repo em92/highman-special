@@ -1,10 +1,9 @@
 {
   "name": "highman-special",
-  "version": "0.2.1",
-  "license" : "MIT",
+  "license": "MIT",
   "author": {
     "name": "Eugene Molotov",
-    "email": "eugene.m92@gmail.com"
+    "email": "eugene.molotov@yandex.ru"
   },
   "repository": {
     "type": "git",
@@ -13,6 +12,7 @@
   "private": true,
   "dependencies": {
     "express": "^4.13.4",
+    "lodash": "^4.17.2",
     "morgan": "^1.7.0",
     "q": "^1.4.1",
     "request-promise": "^3.0.0"
