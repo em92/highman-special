@@ -24,6 +24,11 @@ app.use(morgan('combined', {
 	stream: fs.createWriteStream(path.join(__dirname, 'access.log'), {flags: 'a'})
 }));
 
+app.use(function(req, res, next) {
+  res.set("Connection", "close");
+  next();
+});
+
 app.get('/shuffle/:gametype/:discord_ids', function (req, res) {
 	ql.shuffle(req.params.gametype.toLowerCase(), convertDiscordIdsToArray(req.params.discord_ids), undefined, function(result) {
 		res.setHeader("Content-Type", "application/json");
