@@ -236,7 +236,7 @@ var setSteamId = function(discordId, steamId, done) {
 		
 		d2s[discordId] = steamId;
 		// writeFile не возвращает промис, поэтому пишем так
-		fs.writeFile("./d2s.json", JSON.stringify(d2s), function(error) {
+		fs.writeFile("./d2s.json", JSON.stringify(d2s, null, 2), function(error) {
 			if (error) throw error;
 			done({
 				ok: true,
