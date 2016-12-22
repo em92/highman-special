@@ -358,6 +358,11 @@ var shuffle = function(gametype, playerList, mapname, done) {
 			}
 			return player;
 		});
+
+		// сортируем игроков по убыванию рейтинга
+		playerList.sort( (p1, p2) => {
+			return p2.elo - p1.elo;
+		});
 		
 		// собственно разделяем команды
 		
@@ -416,8 +421,17 @@ var shuffle = function(gametype, playerList, mapname, done) {
 				}
 			}
 		};
-		f();
-		
+
+		// частный случай
+		// red: top1 + top4
+		// blue: top2 + top3
+		// остальных - с минимальной разницей
+		if (playercount == 8) {
+			f(2, [0, 3], 4);
+		} else {
+			f();
+		}
+
 		// записываем тех, что без рейтинга
 		bestCombo[2].players = playerList.reduce(function(sum, current) {
 			if (current.steamid == '0') {
