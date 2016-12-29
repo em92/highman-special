@@ -4,12 +4,13 @@ var d2s = require('./d2s.json');
 var rp = require('request-promise');
 var Q = require('q');
 var _ = require('lodash');
+var cfg = require('./cfg.json');
 
 var steamApiKey = process.env['STEAM_WEB_API_KEY'];
-var ratingApiSource = require('./cfg.json').ratingApiSource;
-var playerInfoApi = require('./cfg.json').playerInfoApi;
-var topListApi = require('./cfg.json').topListApi;
-var mapratingApiSource = require('./cfg.json').mapratingApiSource;
+var ratingApiSource    = cfg.api_backend + '/elo/';
+var playerInfoApi      = cfg.api_backend + '/player/';
+var topListApi         = cfg.api_backend + '/rating/';
+var mapratingApiSource = cfg.api_backend + '/elo_map/';
 
 var GAMETYPES_AVAILABLE = ['ctf', 'tdm'];
 var GAMETYPE_ALIASES = {
@@ -50,19 +51,35 @@ var removeColorsFromQLNickname = function(name) {
 	return name == "" ? "_" : name;
 };
 
-var GetPlayerSummaries = function(steamids) {
-	if (steamids instanceof Array) steamids = steamids.join(",");
-	return rp({
-		uri: 'http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=' + steamApiKey + '&steamids=' + steamids,
-		timeout: 3000,
-		json: true
-	})
-	.catch( error => {
-		throw {
-			error_code: GET_PLAYER_SUMMARIES_ERROR,
-			error_msg: error.message
-		};
-	});
+var GetPlayerSummaries = function(steamids, options) {
+  options = _.extend({
+    on_fail_use_cache: false,
+    use_cache: false
+  }, options);
+
+  if (options.use_cache) {
+    uri = cfg.api_backend + '/steam_api/GetPlayerSummaries/?steamids=' + steamids;
+  } else {
+    uri = 'http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=' + steamApiKey + '&steamids=' + steamids;
+  }
+
+  if (steamids instanceof Array) steamids = steamids.join(",");
+
+  return rp({
+    uri: uri,
+    timeout: 3000,
+    json: true
+  })
+  .catch( error => {
+    if (options.on_fail_use_cache && !options.use_cache) {
+
+      return GetPlayerSummaries(steamids, {use_cache: true});
+
+    } else throw {
+      error_code: GET_PLAYER_SUMMARIES_ERROR,
+      error_msg: error.message
+    };
+  });
 };
 
 
@@ -126,7 +143,7 @@ var getSteamId = function(discordId, done) {
 	
 	var steamId = d2s[discordId];
 	
-	return GetPlayerSummaries(steamId)
+	return GetPlayerSummaries(steamId, {on_fail_use_cache: true})
 	.then( data => {
 		if (data.response.players.length == 0) throw {
 			error_code: INVALID_STEAM_ID,
@@ -285,7 +302,7 @@ var topList = function(gametype, done) {
 
     return GetPlayerSummaries( result.map( player => {
       return player.steam_id;
-    }));
+    }), {on_fail_use_cache: true});
 
   })
   .then( data => {
@@ -338,7 +355,7 @@ var shuffle = function(gametype, playerList, mapname, done) {
 		return Object.keys(steamNames);
 	})
 	// сначала определяем ники
-	.then( GetPlayerSummaries )
+	.then( data => GetPlayerSummaries(data, {on_fail_use_cache: true}) )
 	.then( data => {
 		data.response.players.forEach(function(player) {
 			steamNames[player.steamid] = removeColorsFromQLNickname(player.personaname);
