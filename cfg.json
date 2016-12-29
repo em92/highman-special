@@ -1,7 +1,4 @@
 {
   "httpd_port": 3331,
-  "ratingApiSource": "http://stats.eugenemolotov.ru/elo/",
-  "mapratingApiSource": "http://stats.eugenemolotov.ru/elo_map/",
-  "topListApi": "http://stats.eugenemolotov.ru/rating/",
-  "playerInfoApi": "http://stats.eugenemolotov.ru/player/"
+  "api_backend": "http://stats.eugenemolotov.ru"
 }
