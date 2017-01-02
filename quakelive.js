@@ -7,6 +7,10 @@ var _ = require('lodash');
 var cfg = require('./cfg.json');
 
 var steamApiKey = process.env['STEAM_WEB_API_KEY'];
+if (typeof(steamApiKey) == "undefined") {
+  console.error("warning: STEAM_WEB_API_KEY is not defined in environment vars");
+  steamApiKey == false;
+}
 var ratingApiSource    = cfg.api_backend + '/elo/';
 var playerInfoApi      = cfg.api_backend + '/player/';
 var topListApi         = cfg.api_backend + '/rating/';
@@ -56,6 +60,8 @@ var GetPlayerSummaries = function(steamids, options) {
     on_fail_use_cache: false,
     use_cache: false
   }, options);
+
+  if (!steamApiKey) options.use_cache = true;
 
   if (options.use_cache) {
     uri = cfg.api_backend + '/steam_api/GetPlayerSummaries/?steamids=' + steamids;
