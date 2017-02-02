@@ -28,6 +28,7 @@ var INVALID_STEAM_ID = 3;
 var STEAM_ID_ALREADY_SET = 4;
 var STEAM_ID_NOT_SET = 5;
 var GET_PLAYER_SUMMARIES_ERROR = 6;
+var STEAM_ID_ALREADY_ASSIGNED = 7;
 var ERROR_LIST = [
 	'no error',
 	'invalid gametype',
@@ -35,7 +36,9 @@ var ERROR_LIST = [
 	'invalid steam id',
 	'steam id already set. use /force_map method',
 	'undefined steam id',
-	'error in GetPlayerSummaries: '
+	'error in GetPlayerSummaries: ',
+	'steam id is already assigned to another discord user',
+	null
 ];
 
 var getDiscordIdBySteamId = function(steam_id) {
@@ -272,14 +275,20 @@ var setSteamId = function(discordId, steamId, done) {
 
 
 var setSteamIdPrimary = function(discordId, steamId, done) {
-	if (typeof(d2s[discordId]) == 'undefined') {
-		setSteamId(discordId, steamId, done);
-	} else {
+	if (typeof(d2s[discordId]) != 'undefined') {
 		done({
 			ok: false,
 			error_code: STEAM_ID_ALREADY_SET,
 			error_msg: ERROR_LIST[STEAM_ID_ALREADY_SET]
 		});
+	} else if (getDiscordIdBySteamId(steamId) !== 0) {
+		done({
+			ok: false,
+			error_code: STEAM_ID_ALREADY_ASSIGNED,
+			error_msg: ERROR_LIST[STEAM_ID_ALREADY_ASSIGNED]
+		});
+	} else {
+		setSteamId(discordId, steamId, done);
 	}
 };
 
