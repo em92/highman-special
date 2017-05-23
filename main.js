@@ -61,6 +61,15 @@ app.get('/force_map/:discord_id/:steam_id', function (req, res) {
 	});
 });
 
+app.get('/whois/steam_id/:steam_id', function (req, res) {
+	res.setHeader("Content-Type", "application/json");
+	res.setHeader("Connection", "close");
+	res.send({
+		ok: true,
+		discord_id: ql.getDiscordIdBySteamId(req.params.steam_id).toString()
+	});
+});
+
 app.get('/whois/:discord_id', function (req, res) {
 	ql.getSteamId(req.params.discord_id, function(result) {
 		res.setHeader("Content-Type", "application/json");

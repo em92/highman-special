@@ -482,3 +482,4 @@ module.exports.setSteamIdPrimary = setSteamIdPrimary;
 module.exports.getSteamId = getSteamId;
 module.exports.getRatingsForDiscordId = getRatingsForDiscordId;
 module.exports.topList = topList;
+module.exports.getDiscordIdBySteamId = getDiscordIdBySteamId;
