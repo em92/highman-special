@@ -3,6 +3,7 @@ var morgan = require('morgan');
 var fs = require('fs');
 var path = require('path');
 var ql = require("./quakelive.js");
+var irc = require("./irc.js");
 
 var httpd_port = require("./cfg.json").httpd_port;
 var app = express();
@@ -92,6 +93,10 @@ app.get('/top/:gametype', function (req, res) {
 		res.setHeader("Connection", "close");
 		res.send(result);
 	});
+});
+
+app.get('/irc_pickup_status', function(req, res) {
+  res.json( irc.status );
 });
 
 

@@ -12,6 +12,7 @@
   "private": true,
   "dependencies": {
     "express": "^4.13.4",
+    "irc": "^0.5.2",
     "lodash": "^4.17.2",
     "morgan": "^1.7.0",
     "q": "^1.4.1",
