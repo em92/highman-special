@@ -99,6 +99,11 @@ app.get('/irc_pickup_status', function(req, res) {
   res.json( irc.status );
 });
 
+app.get('/irc_pickup_status/:pickup_name', function(req, res) {
+  irc.w( req.params.pickup_name.toLowerCase(), function( result ) {
+    res.json( result );
+  });
+});
 
 app.listen(httpd_port, function () {
 	console.log("privet, pupsik :3");

@@ -9,6 +9,50 @@ var status = {
   "#tdmpickup": "n/a"
 }
 
+var bot_names = {
+  "#ctfpickup": ["pq-Doom", "pq-Lucy", "pq-Orbb", "pq-Mynx"],
+  "#tdmpickup": ["TDMBot"]
+}
+
+var w_status = {};
+
+var w = function( pickup_name, done ) {
+  var channel = "#" + pickup_name;
+  if (!status[ channel ]) {
+    done({
+      error_code: -1,
+      error_msg: "invalid pickup name",
+      ok: false
+    });
+    return;
+  }
+
+  if ( typeof(w_status[ channel ]) == "string" ) {
+    done({
+      message: w_status[ channel ],
+      ok: true
+    });
+    return;
+  }
+
+  w_status[ channel ] = {
+    done: done,
+    timer_id: setTimeout( () => {
+      if ( w_status[ channel ] && w_status[ channel ].timer_id ) {
+        done({
+          error_code: -1,
+          error_msg: "could not list players",
+          ok: false
+        });
+
+        delete w_status[ channel ];
+      }
+    }, 5000)
+  };
+
+  client.say( channel, "!w" );
+}
+
 client.addListener('error', function(message) {
   console.error('error: ', message);
 });
@@ -22,6 +66,26 @@ client.addListener('topic', function (channel, topic, nick, message) {
     default: return;
   }
   status[ channel ] = topic;
+  delete w_status[ channel ];
+});
+
+
+client.addListener('message#', function (nick, channel, text, message) {
+  if (!status[ channel ]) return;
+  if (bot_names[ channel ].indexOf( nick ) == -1) return;
+  if (!w_status[ channel ]) return;
+  if (!w_status[ channel ].timer_id) return;
+
+  clearTimeout( w_status[ channel ].timer_id );
+
+  var done = w_status[ channel ].done;
+  w_status[ channel ] = text;
+
+  done({
+    message: text,
+    ok: true
+  });
+
 });
 
 Object.defineProperty(module.exports, "status", {
@@ -32,3 +96,4 @@ Object.defineProperty(module.exports, "status", {
   }
 });
 
+module.exports.w = w;
