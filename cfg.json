@@ -1,4 +1,8 @@
 {
   "httpd_port": 3331,
+  "ip_whitelist": [
+    "89.189.128.114",
+    "94.142.139.240"
+  ],
   "api_backend": "http://stats.eugenemolotov.ru"
 }
