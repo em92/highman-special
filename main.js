@@ -3,6 +3,7 @@ var morgan = require('morgan');
 var fs = require('fs');
 var path = require('path');
 var ql = require("./quakelive.js");
+var qc = require("./quakechampions.js");
 var irc = require("./irc.js");
 var cfg = require("./cfg.json");
 
@@ -94,6 +95,30 @@ app.get('/whois/:discord_id', function (req, res) {
 		res.setHeader("Connection", "close");
 		res.send(result);
 	});
+});
+
+app.get('/qc/map/:discord_id/:steam_id', check_ip, function (req, res) {
+	qc.setNickPrimary(req.params.discord_id, req.params.steam_id, function(result) {
+		res.setHeader("Content-Type", "application/json");
+		res.setHeader("Connection", "close");
+		res.send(result);
+	});
+});
+
+app.get('/qc/force_map/:discord_id/:steam_id', check_ip, function (req, res) {
+	qc.setNick(req.params.discord_id, req.params.steam_id, function(result) {
+		res.setHeader("Content-Type", "application/json");
+		res.setHeader("Connection", "close");
+		res.send(result);
+	});
+});
+
+app.get('/qc/whois/:discord_id', function (req, res) {
+  res.json( qc.getNick( req.params.discord_id ) );
+});
+
+app.get('/qc/show_mappings/:discord_ids', function (req, res) {
+	res.json( qc.getNicks(req.params.discord_ids.split(",") ) );
 });
 
 app.get('/ratings/:discord_id', function (req, res) {
