@@ -16,10 +16,9 @@ var playerInfoApi      = cfg.api_backend + '/player/';
 var topListApi         = cfg.api_backend + '/rating/';
 var mapratingApiSource = cfg.api_backend + '/elo_map/';
 
-var GAMETYPES_AVAILABLE = ['ctf', 'tdm'];
+var GAMETYPES_AVAILABLE = ['ctf', 'tdm', 'tdm2v2'];
 var GAMETYPE_ALIASES = {
-  'ctf5v5': 'ctf',
-  'tdm2v2': 'tdm'
+  'ctf5v5': 'ctf'
 }
 var NO_ERROR = 0;
 var INVALID_GAMETYPE = 1;
