@@ -232,7 +232,13 @@ var getRatingsForDiscordId = function(discordId, done) {
 			}
 		});
 		
+		var played_at_least_one_game = false;
+
 		var stats = GAMETYPES_AVAILABLE.map(gametype => {
+			if (played_at_least_one_game == false) {
+				played_at_least_one_game = result[gametype].games > 0;
+			}
+
 			return {
 				type: gametype,
 				rating: result[gametype].rating,
@@ -242,6 +248,11 @@ var getRatingsForDiscordId = function(discordId, done) {
 				max_rank: result[gametype].max_rank,
 			};
 		});
+
+		if (played_at_least_one_game) {
+			stats = stats.filter( item => item.games );
+		}
+
 		done( { ok: true, stats: stats } );
 	})
 	.catch( templateErrorCallback(done) );
