@@ -270,6 +270,9 @@ var setSteamId = function(discordId, steamId, done) {
 				error_msg: ERROR_LIST[INVALID_STEAM_ID]
 			};
 		
+		while( old_discord_id = getDiscordIdBySteamId( steamId ) ) {
+			delete d2s[ old_discord_id ];
+		}
 		d2s[discordId] = steamId;
 		// writeFile не возвращает промис, поэтому пишем так
 		fs.writeFile("./d2s.json", JSON.stringify(d2s, null, 2), function(error) {
