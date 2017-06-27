@@ -224,7 +224,7 @@ var getRatingsForDiscordId = function(discordId, done) {
 					}).slice(-3).reverse();
 				}
 			} else {
-				result[gametype].rating = 1;
+				result[gametype].rating = 0;
 				result[gametype].games = 0;
 				result[gametype].history = [];
 				result[gametype].rank = 0;
