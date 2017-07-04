@@ -12,7 +12,7 @@
   "private": true,
   "dependencies": {
     "express": "^4.13.4",
-    "irc": "matrix-org/node-irc#commithash",
+    "irc": "matrix-org/node-irc#b1614bc784200c65247784d7b9e9ab867140412d",
     "lodash": "^4.17.2",
     "morgan": "^1.7.0",
     "q": "^1.4.1",
