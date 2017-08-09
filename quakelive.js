@@ -13,7 +13,7 @@ if (typeof(steamApiKey) == "undefined") {
 }
 var ratingApiSource    = cfg.api_backend + '/elo/';
 var playerInfoApi      = cfg.api_backend + '/player/';
-var topListApi         = cfg.api_backend + '/rating/';
+var topListApi         = cfg.api_backend + '/ratings/';
 var mapratingApiSource = cfg.api_backend + '/elo_map/';
 
 var GAMETYPES_AVAILABLE = ['ctf', 'tdm', 'tdm2v2'];
@@ -181,7 +181,7 @@ var getRatingsForDiscordId = function(discordId, done) {
 	var steamId = d2s[discordId];
 	
 	return rp({
-		uri: playerInfoApi + steamId,
+		uri: playerInfoApi + steamId + ".json",
 		timeout: 3000,
 		json: true
 	})
@@ -310,7 +310,7 @@ var topList = function(gametype, done) {
   var result = [];
 
   rp({
-    uri: topListApi + gametype + "/0",
+    uri: topListApi + gametype + "/0.json",
     timeout: 3000,
     json: true
   })
