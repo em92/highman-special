@@ -12,7 +12,7 @@ if (typeof(steamApiKey) == "undefined") {
   steamApiKey == false;
 }
 var ratingApiSource    = cfg.api_backend + '/elo/';
-var playerInfoApi      = cfg.api_backend + '/player/';
+var playerInfoApi      = cfg.api_backend + '/deprecated/player/';
 var topListApi         = cfg.api_backend + '/ratings/';
 var mapratingApiSource = cfg.api_backend + '/elo_map/';
 
