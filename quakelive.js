@@ -482,7 +482,7 @@ var shuffle = function(gametype, playerList, mapname, done) {
 		
 		done({
 			ok: true,
-			diff: bestDiff.toFixed(2),
+			diff: parseFloat(bestDiff.toFixed(2)),
 			teams: bestCombo
 		});
 	})
