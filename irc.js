@@ -53,6 +53,9 @@ var w = function( pickup_name, done ) {
 
 client.addListener('error', function(message) {
   console.error('error: ', message);
+  Object.keys( status ).forEach( key => {
+    status[key] = "n/a";
+  });
 });
 
 client.addListener('topic', function (channel, topic, nick, message) {
