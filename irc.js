@@ -1,6 +1,7 @@
 var irc = require('irc');
 var client = new irc.Client('irc.quakenet.org', 'eugene_irc_bot', {
   stripColors: true,
+  retryDelay: 10000,
   channels: ['#tdmpickup']
 });
 
