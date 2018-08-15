@@ -1,7 +1,11 @@
 var irc = require('irc');
+var rp = require('request-promise');
+var Q = require('q');
+var qlsb_backend = require('./cfg.json').qlsb_backend;
 var client = new irc.Client('irc.quakenet.org', 'eugene_irc_bot', {
   stripColors: true,
   retryDelay: 10000,
+  debug: true,
   channels: ['#tdmpickup']
 });
 
@@ -88,6 +92,42 @@ client.addListener('message#', function (nick, channel, text, message) {
   });
 
 });
+
+setInterval( function() {
+  var server_list = {
+    "45.32.158.52:27960": "#omega CTF DE #1",
+    "45.32.158.52:27961": "#omega CTF DE #2",
+    "45.32.187.38:27960": "#omega CTF NL #1",
+  };
+
+  var server_query = Object.keys(server_list).map( server => {
+    return rp({
+      uri: qlsb_backend + '/serverinfo/' + server,
+      timeout: 3000,
+      json: true
+    })
+    .catch( _ => null );
+  });
+
+  Q.all(server_query)
+  .then(server_query_result => {
+    server_query_result.forEach(item => {
+      var channel = server_list[ item.host_address ];
+      if (!item || !item.host_address) {
+        status[ channel ] = "n/a";
+        return;
+      }
+      try
+      {
+        var topic = "[" + item.gameinfo.players.length + "/" + (item.gameinfo.teamsize * 2) + "] \\connect " + item.host_address;
+        status[ channel ] = topic;
+      } catch(e) {
+        console.error("server_query_result");
+        console.error(e);
+      }
+    });
+  });
+}, 10000);
 
 Object.defineProperty(module.exports, "status", {
   get: function() {
