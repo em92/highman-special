@@ -18,6 +18,7 @@ var mapratingApiSource = cfg.api_backend + '/elo_map/';
 
 var GAMETYPES_AVAILABLE = ['ctf', 'tdm', 'tdm2v2'];
 var GAMETYPE_ALIASES = {
+  'ctfs': 'ctf',
   'ctf5v5': 'ctf'
 }
 var NO_ERROR = 0;
