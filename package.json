@@ -13,7 +13,7 @@
   "dependencies": {
     "express": "4.15.3",
     "irc": "Ajnasz/node-irc#f81e5391c4032cc9ae15f60a96f8770392538c3a",
-    "lodash": "4.17.4",
+    "lodash": "4.17.5",
     "morgan": "1.8.2",
     "q": "1.5.0",
     "request-promise": "3.0.0"
