@@ -93,7 +93,7 @@ client.addListener('message#', function (nick, channel, text, message) {
 
 });
 
-setInterval( function() {
+if (qlsb_backend) setInterval( function() {
   var server_list = {
     "45.32.158.52:27960": "#omega CTF DE #1",
     "45.32.158.52:27961": "#omega CTF DE #2",
