@@ -5,7 +5,6 @@ var qlsb_backend = require('./cfg.json').qlsb_backend;
 var client = new irc.Client('irc.quakenet.org', 'eugene_irc_bot', {
   stripColors: true,
   retryDelay: 10000,
-  debug: true,
   channels: ['#tdmpickup']
 });
 
