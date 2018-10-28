@@ -18,6 +18,12 @@ var convertDiscordIdsToArray = function(s) {
 };
 
 var check_ip = function(req, res, next) {
+  var apiKey = process.env['API_KEY'];
+  if(apiKey && req.query.apikey == apiKey) {
+    next();
+    return;
+  }
+
   var ip4 = req.connection.remoteAddress.replace('::ffff:', '');
   var ip6 = req.connection.remoteAddress;
 
