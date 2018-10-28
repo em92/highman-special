@@ -16,6 +16,7 @@ var playerInfoApi      = cfg.api_backend + '/deprecated/player/';
 var topListApi         = cfg.api_backend + '/ratings/';
 var mapratingApiSource = cfg.api_backend + '/elo_map/';
 
+var HTTP_TIMEOUT = 5000;
 var GAMETYPES_AVAILABLE = ['ctf', 'tdm', 'tdm2v2'];
 var GAMETYPE_ALIASES = {
   'ctfs': 'ctf',
@@ -76,7 +77,7 @@ var GetPlayerSummaries = function(steamids, options) {
 
   return rp({
     uri: uri,
-    timeout: 3000,
+    timeout: HTTP_TIMEOUT,
     json: true
   })
   .catch( error => {
@@ -96,7 +97,7 @@ var getRatingsForSteamIds = function(steamids, gametype, mapname) {
 	if (steamids instanceof Array) steamids = steamids.join("+");
 	return rp({
 		uri: typeof(mapname) == "undefined" ? ratingApiSource + steamids : mapratingApiSource + gametype + "/" + mapname + "/" + steamids,
-		timeout: 3000,
+		timeout: HTTP_TIMEOUT,
 		json: true
 	})
 	.then( data => {
@@ -183,7 +184,7 @@ var getRatingsForDiscordId = function(discordId, done) {
 	
 	return rp({
 		uri: playerInfoApi + steamId + ".json",
-		timeout: 3000,
+		timeout: HTTP_TIMEOUT,
 		json: true
 	})
 	.then( data => {
@@ -312,7 +313,7 @@ var topList = function(gametype, done) {
 
   rp({
     uri: topListApi + gametype + "/0.json",
-    timeout: 3000,
+    timeout: HTTP_TIMEOUT,
     json: true
   })
   .then( item => {
