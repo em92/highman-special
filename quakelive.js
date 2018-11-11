@@ -3,7 +3,6 @@ var extend = require('util')._extend;
 var d2s = require('./d2s.json');
 var rp = require('request-promise');
 var Q = require('q');
-var _ = require('lodash');
 var cfg = require('./cfg.json');
 
 var steamApiKey = process.env['STEAM_WEB_API_KEY'];
@@ -43,7 +42,7 @@ var ERROR_LIST = [
 ];
 
 var getDiscordIdBySteamId = function(steam_id) {
-  var result = _.findKey(d2s, (item) => (item == steam_id));
+  var result = Object.keys(d2s).find( item => d2s[item] == steam_id);
   return (typeof(result) != "undefined") ? result : 0;
 }
 
@@ -60,7 +59,7 @@ var removeColorsFromQLNickname = function(name) {
 };
 
 var GetPlayerSummaries = function(steamids, options) {
-  options = _.extend({
+  options = Object.assign({
     on_fail_use_cache: false,
     use_cache: false
   }, options);
