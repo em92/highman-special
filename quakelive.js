@@ -1,5 +1,4 @@
 var fs = require('fs');
-var extend = require('util')._extend;
 var d2s = require('./d2s.json');
 var rp = require('request-promise');
 var Q = require('q');
@@ -134,7 +133,7 @@ var templateErrorCallback = function(done) {
 				error_msg: error.message
 			});
 		} else {
-			done(extend({ok: false}, error));
+			done(Object.assign({ok: false}, error));
 		};
 	};
 };
