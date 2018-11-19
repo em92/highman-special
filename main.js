@@ -128,6 +128,12 @@ app.get('/irc_pickup_status/:pickup_name', function(req, res) {
   });
 });
 
+app.get('/scoreboard/:match_id', function(req, res) {
+  ql.getScoreboard( req.params.match_id, function( result ) {
+    res.json( result );
+  });
+});
+
 app.listen(httpd_port, function () {
 	console.log("privet, pupsik :3");
 });

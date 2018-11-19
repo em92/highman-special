@@ -13,6 +13,7 @@ var ratingApiSource    = cfg.api_backend + '/elo/';
 var playerInfoApi      = cfg.api_backend + '/deprecated/player/';
 var topListApi         = cfg.api_backend + '/ratings/';
 var mapratingApiSource = cfg.api_backend + '/elo_map/';
+var scoreboardApi      = cfg.api_backend + '/scoreboard/';
 
 var HTTP_TIMEOUT = 5000;
 var GAMETYPES_AVAILABLE = ['ctf', 'tdm', 'tdm2v2'];
@@ -306,6 +307,38 @@ var setSteamIdPrimary = function(discordId, steamId, done) {
 };
 
 
+var getScoreboard = function(match_id, done) {
+  var pasteDiscordId = function(obj) {
+    for (var key in obj) {
+      if (key == "steam_id") {
+        obj['discord_id'] = getDiscordIdBySteamId(obj[key]);
+      } else if (typeof(obj[key]) == "object") {
+        pasteDiscordId(obj[key]);
+      }
+    }
+  };
+
+  rp({
+    uri: scoreboardApi + match_id + ".json",
+    timeout: HTTP_TIMEOUT,
+    json: true
+  })
+  .then( data => {
+      if (data.ok == false) {
+        done({
+          ok: false,
+          error_code: -1,
+          error_msg: data.message
+        });
+        return;
+      }
+
+      pasteDiscordId(data);
+      done(data);
+   })
+  .catch( templateErrorCallback(done) );
+};
+
 var topList = function(gametype, done) {
   var result = [];
 
@@ -497,3 +530,4 @@ module.exports.getSteamId = getSteamId;
 module.exports.getRatingsForDiscordId = getRatingsForDiscordId;
 module.exports.topList = topList;
 module.exports.getDiscordIdBySteamId = getDiscordIdBySteamId;
+module.exports.getScoreboard = getScoreboard
