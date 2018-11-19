@@ -306,6 +306,33 @@ var setSteamIdPrimary = function(discordId, steamId, done) {
 	}
 };
 
+var getLastMatches = function(from_ts, done) {
+  rp({
+    uri: cfg.api_backend + "/deprecated/last_24h_matches.json",
+    timeout: HTTP_TIMEOUT,
+    json: true,
+  })
+  .then( data => {
+    if (data.ok == false) {
+      done({
+        ok: false,
+        error_code: -1,
+        error_msg: data.message
+      });
+      return;
+    }
+
+    data.matches = data.matches.filter( match => {
+      return GAMETYPES_AVAILABLE.includes(match.gametype);
+    });
+
+    delete data.title;
+    delete data.page_count;
+    done(data);
+  })
+  .catch( templateErrorCallback(done) );
+
+};
 
 var getScoreboard = function(match_id, done) {
   var pasteDiscordId = function(obj) {
@@ -530,4 +557,5 @@ module.exports.getSteamId = getSteamId;
 module.exports.getRatingsForDiscordId = getRatingsForDiscordId;
 module.exports.topList = topList;
 module.exports.getDiscordIdBySteamId = getDiscordIdBySteamId;
-module.exports.getScoreboard = getScoreboard
+module.exports.getScoreboard = getScoreboard;
+module.exports.getLastMatches = getLastMatches;
