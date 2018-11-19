@@ -42,7 +42,7 @@ var ERROR_LIST = [
 
 var getDiscordIdBySteamId = function(steam_id) {
   var result = Object.keys(d2s).find( item => d2s[item] == steam_id);
-  return (typeof(result) != "undefined") ? result : 0;
+  return (typeof(result) != "undefined") ? result : '0';
 }
 
 var removeColorsFromQLNickname = function(name) {
