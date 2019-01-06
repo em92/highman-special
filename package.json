@@ -11,9 +11,10 @@
   },
   "private": true,
   "dependencies": {
-    "express": "4.15.3",
+    "express": "4.16.4",
     "irc": "Ajnasz/node-irc#f81e5391c4032cc9ae15f60a96f8770392538c3a",
-    "morgan": "1.8.2",
-    "request-promise": "3.0.0"
+    "morgan": "1.9.1",
+    "request": "2.88.0",
+    "request-promise": "4.2.2"
   }
 }
