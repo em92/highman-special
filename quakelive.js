@@ -1,7 +1,6 @@
 var fs = require('fs');
 var d2s = require('./d2s.json');
 var rp = require('request-promise');
-var Q = require('q');
 var cfg = require('./cfg.json');
 
 var steamApiKey = process.env['STEAM_WEB_API_KEY'];

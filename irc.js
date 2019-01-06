@@ -1,6 +1,5 @@
 var irc = require('irc');
 var rp = require('request-promise');
-var Q = require('q');
 var qlsb_backend = require('./cfg.json').qlsb_backend;
 var client = new irc.Client('irc.quakenet.org', 'eugene_irc_bot', {
   stripColors: true,
@@ -108,7 +107,7 @@ if (qlsb_backend) setInterval( function() {
     .catch( _ => null );
   });
 
-  Q.all(server_query)
+  Promise.all(server_query)
   .then(server_query_result => {
     server_query_result.forEach(item => {
       var channel = server_list[ item.host_address ];
