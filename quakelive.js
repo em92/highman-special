@@ -412,7 +412,7 @@ var shuffle = function(gametype, playerList, mapname, done) {
 	var playercount = Object.keys(playerList).length;
 	var steamNames = {};
 	
-	Q()
+	new Promise((resolve) => {resolve()})
 	.then( () => {
 		if ( GAMETYPE_ALIASES[ gametype ] ) gametype = GAMETYPE_ALIASES[ gametype ];
 		if ( GAMETYPES_AVAILABLE.some( item => { return gametype == item } ) == false )
