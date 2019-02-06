@@ -42,7 +42,7 @@ var ERROR_LIST = [
 
 var getDiscordIdBySteamId = function(steam_id) {
   var result = Object.keys(d2s).find( item => d2s[item] == steam_id);
-  return (typeof(result) != "undefined") ? result : '0';
+  return (typeof(result) != "undefined") ? result : '';
 }
 
 var removeColorsFromQLNickname = function(name) {
@@ -294,7 +294,7 @@ var setSteamIdPrimary = function(discordId, steamId, done) {
 			error_code: STEAM_ID_ALREADY_SET,
 			error_msg: ERROR_LIST[STEAM_ID_ALREADY_SET]
 		});
-	} else if (getDiscordIdBySteamId(steamId) !== 0) {
+	} else if (getDiscordIdBySteamId(steamId)) {
 		done({
 			ok: false,
 			error_code: STEAM_ID_ALREADY_ASSIGNED,
