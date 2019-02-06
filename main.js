@@ -90,7 +90,7 @@ app.get('/whois/steam_id/:steam_id', function (req, res) {
 	res.setHeader("Connection", "close");
 	res.send({
 		ok: true,
-		discord_id: ql.getDiscordIdBySteamId(req.params.steam_id).toString()
+		discord_id: ql.getDiscordIdBySteamId(req.params.steam_id)
 	});
 });
 
