@@ -5,7 +5,10 @@
 ### Перед установкой
 
 - Берем Steam Web API key: https://steamcommunity.com/dev/apikey
-- Придумываем себе API_KEY, чтобы методы map/force_map не ограничивались по-айпи клиента
+- Придумываем VITYA_API_KEY, чтобы методы map/force_map работали и можно было записывать статусы пикапа
+- Придумываем DRAYAN_API_KEY, чтобы тот смог записывать статусы пикапа
+- Убеждаемся, что VITYA_API_KEY и DRAYAN_API_KEY разные!
+- Записываем все это в `.env` файл. Для примера - `.env.example`
 
 ### Установка и запуск
 
@@ -14,8 +17,6 @@ git clone https://github.com/em92/highman-special.git
 cd ./highman-special
 sudo apt-get install libicu-dev
 npm install
-export STEAM_WEB_API_KEY=DDD110059DBBBBBC0AAA0579F5D2B302
-export API_KEY=1234 # тут устанвливаем ключ для методов force_map, map
 node main.js
 ```
 
@@ -26,7 +27,6 @@ node main.js
 ```
 [program:h]
 command=/usr/bin/node /home/eugene/highman-special/main.js
-environment=STEAM_WEB_API_KEY=<ТУТ_СВОЙ>,API_KEY=<АНАЛОГИЧНО>
 directory=/home/eugene/highman-special/
 autostart=true
 autorestart=true

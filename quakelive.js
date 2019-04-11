@@ -1,18 +1,17 @@
 var fs = require('fs');
 var d2s = require('./d2s.json');
 var rp = require('request-promise');
-var cfg = require('./cfg.json');
 
 var steamApiKey = process.env['STEAM_WEB_API_KEY'];
 if (typeof(steamApiKey) == "undefined") {
   console.error("warning: STEAM_WEB_API_KEY is not defined in environment vars");
   steamApiKey == false;
 }
-var ratingApiSource    = cfg.api_backend + '/elo/';
-var playerInfoApi      = cfg.api_backend + '/deprecated/player/';
-var topListApi         = cfg.api_backend + '/ratings/';
-var mapratingApiSource = cfg.api_backend + '/elo_map/';
-var scoreboardApi      = cfg.api_backend + '/scoreboard/';
+var ratingApiSource    = process.env.API_BACKEND + '/elo/';
+var playerInfoApi      = process.env.API_BACKEND + '/deprecated/player/';
+var topListApi         = process.env.API_BACKEND + '/ratings/';
+var mapratingApiSource = process.env.API_BACKEND + '/elo_map/';
+var scoreboardApi      = process.env.API_BACKEND + '/scoreboard/';
 
 var HTTP_TIMEOUT = 5000;
 var GAMETYPES_AVAILABLE = ['ctf', 'tdm', 'tdm2v2'];
@@ -66,7 +65,7 @@ var GetPlayerSummaries = function(steamids, options) {
   if (!steamApiKey) options.use_cache = true;
 
   if (options.use_cache) {
-    uri = cfg.api_backend + '/steam_api/GetPlayerSummaries/?steamids=' + steamids;
+    uri = process.env.API_BACKEND + '/steam_api/GetPlayerSummaries/?steamids=' + steamids;
   } else {
     uri = 'http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=' + steamApiKey + '&steamids=' + steamids;
   }

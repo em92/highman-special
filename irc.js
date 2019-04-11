@@ -1,6 +1,6 @@
 var irc = require('irc');
 var rp = require('request-promise');
-var qlsb_backend = require('./cfg.json').qlsb_backend;
+var qlsb_backend = process.env.QLSB_BACKEND;
 var client = new irc.Client('irc.quakenet.org', 'eugene_irc_bot', {
   stripColors: true,
   retryDelay: 10000,

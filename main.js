@@ -1,13 +1,14 @@
+require('dotenv').config()
 var express = require('express');
 var morgan = require('morgan');
 var fs = require('fs');
 var path = require('path');
 var ql = require("./quakelive.js");
 var irc = require("./irc.js");
-var cfg = require("./cfg.json");
+var middlewares = require("./middlewares.js");
 
-var httpd_port = cfg.httpd_port || 3331;
-var ip_whitelist = cfg.ip_whitelist || [];
+var authRequired = middlewares.authRequired;
+var httpd_port = parseInt(process.env.PORT) || 3331;
 var app = express();
 
 var convertDiscordIdsToArray = function(s) {
@@ -15,27 +16,6 @@ var convertDiscordIdsToArray = function(s) {
 		return {"discordid": e};
 	});
 	return data;
-};
-
-var check_ip = function(req, res, next) {
-  var apiKey = process.env['API_KEY'];
-  if(apiKey && req.query.apikey == apiKey) {
-    next();
-    return;
-  }
-
-  var ip4 = req.connection.remoteAddress.replace('::ffff:', '');
-  var ip6 = req.connection.remoteAddress;
-
-  if ( ip_whitelist.indexOf(ip4) == -1 && ip_whitelist.indexOf(ip6) == -1 ) {
-    res.json({
-      "error_msg": "your ip address is not in whitelist",
-      "error_code": -1,
-      "ok": false
-    });
-  } else {
-    next();
-  }
 };
 
 app.use(morgan('combined', {
@@ -69,7 +49,7 @@ app.get('/shuffle_map/:map/:gametype/:discord_ids', function (req, res) {
 	});
 });
 
-app.get('/map/:discord_id/:steam_id', check_ip, function (req, res) {
+app.get('/map/:discord_id/:steam_id', authRequired(["VITYA"]), function (req, res) {
 	ql.setSteamIdPrimary(req.params.discord_id, req.params.steam_id, function(result) {
 		res.setHeader("Content-Type", "application/json");
 		res.setHeader("Connection", "close");
@@ -77,7 +57,7 @@ app.get('/map/:discord_id/:steam_id', check_ip, function (req, res) {
 	});
 });
 
-app.get('/force_map/:discord_id/:steam_id', check_ip, function (req, res) {
+app.get('/force_map/:discord_id/:steam_id', authRequired(["VITYA"]), function (req, res) {
 	ql.setSteamId(req.params.discord_id, req.params.steam_id, function(result) {
 		res.setHeader("Content-Type", "application/json");
 		res.setHeader("Connection", "close");
