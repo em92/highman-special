@@ -3,6 +3,7 @@ var express = require('express');
 var morgan = require('morgan');
 var fs = require('fs');
 var path = require('path');
+var bodyParser = require('body-parser')
 var ql = require("./quakelive.js");
 var irc = require("./irc.js");
 var middlewares = require("./middlewares.js");
@@ -112,6 +113,21 @@ app.get('/scoreboard/:match_id', function(req, res) {
   ql.getScoreboard( req.params.match_id, function( result ) {
     res.json( result );
   });
+});
+
+var pickupStatus = {};
+
+app.get('/pickup_status', authRequired(["VITYA", "DRAYAN"]), function(req, res) {
+    var result = Object.assign({}, pickupStatus);
+    delete result[req.user];
+    res.json(result);
+});
+
+app.post('/pickup_status', authRequired(["VITYA", "DRAYAN"]), bodyParser.json({limit: '256b'}), function(req, res) {
+    console.log(req.body, req.user);
+    var result = Object.assign({}, pickupStatus);
+    delete result[req.user];
+    res.json(result);
 });
 
 app.listen(httpd_port, function () {
