@@ -134,12 +134,6 @@ app.get('/scoreboard/:match_id', function(req, res) {
   });
 });
 
-app.get('/last_24h_matches', function(req, res) {
-  ql.getLastMatches( Math.floor(Date.now() / 1000) - 24*60*60, function( result ) {
-    res.json( result );
-  });
-});
-
 app.listen(httpd_port, function () {
 	console.log("privet, pupsik :3");
 });
