@@ -126,8 +126,18 @@ function t(value) {
 }
 
 app.get('/pickup_status', authRequired(["VITYA", "DRAYAN"]), function(req, res) {
-    var result = Object.assign({}, pickupStatus);
-    delete result[t(req.user)];
+    var status = Object.assign({}, pickupStatus);
+    var result = [];
+    delete status[t(req.user)];
+    Object.keys(status).forEach(pickupServer => {
+        var line = Object.keys(status[pickupServer]).reduce((sum, pickup) => {
+            return sum + " " + pickup + "[" + status[pickupServer][pickup] + "]";
+        }, "");
+        result.push({
+            "server": pickupServer,
+            "status": line.trim(),
+        });
+    });
     res.json(result);
 });
 
@@ -138,9 +148,17 @@ app.post('/pickup_status', authRequired(["VITYA", "DRAYAN"]), bodyParser.json(),
             data[key] = req.body[key];
         }
     });
-    pickupStatus[t(req.user)] = data;
-    var result = Object.assign({}, pickupStatus);
-    res.json(result);
+
+    var pickupServer = t(req.user);
+    pickupStatus[pickupServer] = data;
+    var line = Object.keys(data).reduce((sum, pickup) => {
+        return sum + " " + pickup + "[" + data[pickup] + "]";
+    }, "");
+
+    res.json({
+        "server": pickupServer,
+        "status": line.trim(),
+    });
 });
 
 app.listen(httpd_port, function () {
