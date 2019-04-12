@@ -117,16 +117,29 @@ app.get('/scoreboard/:match_id', function(req, res) {
 
 var pickupStatus = {};
 
+function t(value) {
+    switch(value) {
+        case 'DRAYAN': return "HoQ";
+        case 'VITYA': return "RU";
+        default: return value;
+    }
+}
+
 app.get('/pickup_status', authRequired(["VITYA", "DRAYAN"]), function(req, res) {
     var result = Object.assign({}, pickupStatus);
-    delete result[req.user];
+    delete result[t(req.user)];
     res.json(result);
 });
 
-app.post('/pickup_status', authRequired(["VITYA", "DRAYAN"]), bodyParser.json({limit: '256b'}), function(req, res) {
-    console.log(req.body, req.user);
+app.post('/pickup_status', authRequired(["VITYA", "DRAYAN"]), bodyParser.json(), function(req, res) {
+    var data = {};
+    Object.keys(req.body).forEach( key => {
+        if (typeof(req.body[key]) == "string") {
+            data[key] = req.body[key];
+        }
+    });
+    pickupStatus[t(req.user)] = data;
     var result = Object.assign({}, pickupStatus);
-    delete result[req.user];
     res.json(result);
 });
 
