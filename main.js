@@ -4,7 +4,6 @@ var morgan = require('morgan');
 var fs = require('fs');
 var path = require('path');
 var ql = require("./quakelive.js");
-var irc = require("./irc.js");
 var middlewares = require("./middlewares.js");
 
 var authRequired = middlewares.authRequired;
@@ -96,16 +95,6 @@ app.get('/top/:gametype', function (req, res) {
 		res.setHeader("Connection", "close");
 		res.send(result);
 	});
-});
-
-app.get('/irc_pickup_status', function(req, res) {
-  res.json( irc.status );
-});
-
-app.get('/irc_pickup_status/:pickup_name', function(req, res) {
-  irc.w( req.params.pickup_name.toLowerCase(), function( result ) {
-    res.json( result );
-  });
 });
 
 app.get('/scoreboard/:match_id', function(req, res) {
