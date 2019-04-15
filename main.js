@@ -9,6 +9,7 @@ var irc = require("./irc.js");
 var middlewares = require("./middlewares.js");
 
 var authRequired = middlewares.authRequired;
+var authOptional = middlewares.authOptional;
 var httpd_port = parseInt(process.env.PORT) || 3331;
 var app = express();
 
@@ -125,7 +126,7 @@ function t(value) {
     }
 }
 
-app.get('/pickup_status', authRequired(["VITYA", "DRAYAN"]), function(req, res) {
+app.get('/pickup_status', authOptional(["VITYA", "DRAYAN"]), function(req, res) {
     var status = Object.assign({}, pickupStatus);
     var result = [];
     delete status[t(req.user)];
@@ -134,14 +135,14 @@ app.get('/pickup_status', authRequired(["VITYA", "DRAYAN"]), function(req, res) 
             return sum + " " + pickup + "[" + status[pickupServer][pickup] + "]";
         }, "");
         result.push({
-            "server": pickupServer,
-            "status": line.trim(),
+            "pickup_name": pickupServer,
+            "topic": line.trim(),
         });
     });
     res.json(result);
 });
 
-app.post('/pickup_status', authRequired(["VITYA", "DRAYAN"]), bodyParser.json(), function(req, res) {
+app.post('/update_pickup_status', authRequired(["VITYA", "DRAYAN"]), bodyParser.json(), function(req, res) {
     var data = {};
     Object.keys(req.body).forEach( key => {
         if (typeof(req.body[key]) == "string") {
@@ -156,8 +157,8 @@ app.post('/pickup_status', authRequired(["VITYA", "DRAYAN"]), bodyParser.json(),
     }, "");
 
     res.json({
-        "server": pickupServer,
-        "status": line.trim(),
+        "pickup_name": pickupServer,
+        "topic": line.trim(),
     });
 });
 
