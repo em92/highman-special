@@ -3,13 +3,11 @@ var express = require('express');
 var morgan = require('morgan');
 var fs = require('fs');
 var path = require('path');
-var bodyParser = require('body-parser')
 var ql = require("./quakelive.js");
 var irc = require("./irc.js");
 var middlewares = require("./middlewares.js");
 
 var authRequired = middlewares.authRequired;
-var authOptional = middlewares.authOptional;
 var httpd_port = parseInt(process.env.PORT) || 3331;
 var app = express();
 
@@ -116,51 +114,7 @@ app.get('/scoreboard/:match_id', function(req, res) {
   });
 });
 
-var pickupStatus = {};
-
-function t(value) {
-    switch(value) {
-        case 'DRAYAN': return "HoQ";
-        case 'VITYA': return "RU";
-        default: return value;
-    }
-}
-
-app.get('/pickup_status', authOptional(["VITYA", "DRAYAN"]), function(req, res) {
-    var status = Object.assign({}, pickupStatus);
-    var result = [];
-    delete status[t(req.user)];
-    Object.keys(status).forEach(pickupServer => {
-        var line = Object.keys(status[pickupServer]).reduce((sum, pickup) => {
-            return sum + " " + pickup + "[" + status[pickupServer][pickup] + "]";
-        }, "");
-        result.push({
-            "pickup_name": pickupServer,
-            "topic": line.trim(),
-        });
-    });
-    res.json(result);
-});
-
-app.post('/update_pickup_status', authRequired(["VITYA", "DRAYAN"]), bodyParser.json(), function(req, res) {
-    var data = {};
-    Object.keys(req.body).forEach( key => {
-        if (typeof(req.body[key]) == "string") {
-            data[key] = req.body[key];
-        }
-    });
-
-    var pickupServer = t(req.user);
-    pickupStatus[pickupServer] = data;
-    var line = Object.keys(data).reduce((sum, pickup) => {
-        return sum + " " + pickup + "[" + data[pickup] + "]";
-    }, "");
-
-    res.json({
-        "pickup_name": pickupServer,
-        "topic": line.trim(),
-    });
-});
+require('./pickup_status.js')(app);
 
 app.listen(httpd_port, function () {
 	console.log("privet, pupsik :3");
