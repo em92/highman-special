@@ -28,11 +28,24 @@ function convertPickupStatusToPairs(status) {
 }
 
 module.exports = function(app) {
+    app.get('/irc_pickup_status', function(req, res) {
+        var status = Object.assign({}, pickupStatus);
+        delete status[t("VITYA")];
+        var result = convertPickupStatusToPairs(status);
+        res.json({
+            'ok': true,
+            'irc_pickups': result,
+        });
+    });
+
     app.get('/pickup_status', authOptional(["VITYA", "DRAYAN"]), function(req, res) {
         var status = Object.assign({}, pickupStatus);
         delete status[t(req.user)];
         var result = convertPickupStatusToPairs(status);
-        res.json(result);
+        res.json({
+            'ok': true,
+            'pickups': result,
+        });
     });
     
     app.post('/update_pickup_status', authRequired(["VITYA", "DRAYAN"]), bodyParser.json(), function(req, res) {
@@ -50,9 +63,9 @@ module.exports = function(app) {
             return sum + " " + pickup + "[" + data[pickup] + "]";
         }, "");
     
-        res.json({
+        res.json({'ok': true, 'pickup': {
             "pickup_name": pickupServer,
             "topic": line.trim(),
-        });
+        }});
     });
 }
