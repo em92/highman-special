@@ -1,6 +1,45 @@
 var fs = require('fs');
 var d2s = require('./d2s.json');
-var rp = require('request-promise');
+var rpbase = require('request-promise');
+var LRU = require('lru-cache');
+
+var cache = new LRU(50);
+
+var deepCopy = function(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+
+var rp = function(uri) {
+  var options = {
+    uri,
+    timeout: HTTP_TIMEOUT,
+    json: true,
+    transform: function(body, response) {
+      if (body) return {
+        date: response.headers['last-modified'],
+        body: body,
+      }
+    },
+    headers: {},
+  };
+
+  var cachedResult = cache.get(uri) || {};
+  if (cachedResult.date) {
+    options.headers['If-Modified-Since'] = cachedResult.date;
+  }
+
+  return rpbase(options)
+  .then( data => {
+    if (data.date) {
+      cache.set(uri, deepCopy(data));
+    }
+    return deepCopy(data.body);
+  })
+  .catch(error => {
+    if (error.statusCode != 304) throw error;
+    return deepCopy(cachedResult.body);
+  });
+}
 
 var steamApiKey = process.env['STEAM_WEB_API_KEY'];
 if (typeof(steamApiKey) == "undefined") {
@@ -72,11 +111,7 @@ var GetPlayerSummaries = function(steamids, options) {
 
   if (steamids instanceof Array) steamids = steamids.join(",");
 
-  return rp({
-    uri: uri,
-    timeout: HTTP_TIMEOUT,
-    json: true
-  })
+  return rp(uri)
   .catch( error => {
     if (options.on_fail_use_cache && !options.use_cache) {
 
@@ -92,11 +127,7 @@ var GetPlayerSummaries = function(steamids, options) {
 
 var getRatingsForSteamIds = function(steamids, gametype, mapname) {
 	if (steamids instanceof Array) steamids = steamids.join("+");
-	return rp({
-		uri: typeof(mapname) == "undefined" ? ratingApiSource + steamids : mapratingApiSource + gametype + "/" + mapname + "/" + steamids,
-		timeout: HTTP_TIMEOUT,
-		json: true
-	})
+	return rp(typeof(mapname) == "undefined" ? ratingApiSource + steamids : mapratingApiSource + gametype + "/" + mapname + "/" + steamids)
 	.then( data => {
 		
 		var result = {};
@@ -179,11 +210,7 @@ var getRatingsForDiscordId = function(discordId, done) {
 	
 	var steamId = d2s[discordId];
 	
-	return rp({
-		uri: playerInfoApi + steamId + ".json",
-		timeout: HTTP_TIMEOUT,
-		json: true
-	})
+	return rp(playerInfoApi + steamId + ".json")
 	.then( data => {
 		var player = data.player;
 		var result = {};
@@ -315,11 +342,7 @@ var getScoreboard = function(match_id, done) {
     }
   };
 
-  rp({
-    uri: scoreboardApi + match_id + ".json",
-    timeout: HTTP_TIMEOUT,
-    json: true
-  })
+  rp(scoreboardApi + match_id + ".json")
   .then( data => {
       if (data.ok == false) {
         done({
@@ -339,11 +362,7 @@ var getScoreboard = function(match_id, done) {
 var topList = function(gametype, done) {
   var result = [];
 
-  rp({
-    uri: topListApi + gametype + "/0.json",
-    timeout: HTTP_TIMEOUT,
-    json: true
-  })
+  rp(topListApi + gametype + "/0.json")
   .then( item => {
     if (item.ok == false) throw new Error(item.message);
     
