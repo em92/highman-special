@@ -49,7 +49,6 @@ if (typeof(steamApiKey) == "undefined") {
 var ratingApiSource    = process.env.API_BACKEND + '/elo/';
 var playerInfoApi      = process.env.API_BACKEND + '/deprecated/player/';
 var topListApi         = process.env.API_BACKEND + '/ratings/';
-var mapratingApiSource = process.env.API_BACKEND + '/elo_map/';
 var scoreboardApi      = process.env.API_BACKEND + '/scoreboard/';
 
 var HTTP_TIMEOUT = 5000;
@@ -125,9 +124,9 @@ var GetPlayerSummaries = function(steamids, options) {
 };
 
 
-var getRatingsForSteamIds = function(steamids, gametype, mapname) {
+var getRatingsForSteamIds = function(steamids) {
 	if (steamids instanceof Array) steamids = steamids.join("+");
-	return rp(typeof(mapname) == "undefined" ? ratingApiSource + steamids : mapratingApiSource + gametype + "/" + mapname + "/" + steamids)
+	return rp(ratingApiSource + steamids)
 	.then( data => {
 		
 		var result = {};
@@ -396,7 +395,7 @@ var topList = function(gametype, done) {
 };
 
 
-var shuffle = function(gametype, playerList, mapname, done) {
+var shuffle = function(gametype, playerList, done) {
 	
 	var teamsize = parseInt(Object.keys(playerList).length / 2);
 	var playercount = Object.keys(playerList).length;
@@ -437,8 +436,9 @@ var shuffle = function(gametype, playerList, mapname, done) {
 		data.response.players.forEach(function(player) {
 			steamNames[player.steamid] = removeColorsFromQLNickname(player.personaname);
 		});
-		return getRatingsForSteamIds(Object.keys(steamNames), gametype, mapname);
+		return Object.keys(steamNames);
 	})
+	.then( getRatingsForSteamIds )
 	.then( data => {
 		playerList = playerList.map( player => {
 			if (player.steamid != '0') {
