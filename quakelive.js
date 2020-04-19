@@ -369,7 +369,7 @@ var topList = function(gametype, done) {
       player.games = player.n;
       player.steam_id = player._id;
       player.name = removeColorsFromQLNickname(player.name);
-      player.discord_id = getDiscordIdBySteamId(player._id);
+      player.discord_id = getDiscordIdBySteamId(player._id) || '0';
       delete player.n;
       delete player._id;
       delete player.model;
