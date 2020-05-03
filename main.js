@@ -95,8 +95,6 @@ app.get('/scoreboard/:match_id', function(req, res) {
   });
 });
 
-require('./pickup_status.js')(app);
-
 app.listen(httpd_port, function () {
 	console.log("privet, pupsik :3");
 });
