@@ -5,9 +5,7 @@
 ### Перед установкой
 
 - Берем Steam Web API key: https://steamcommunity.com/dev/apikey
-- Придумываем VITYA_API_KEY, чтобы методы map/force_map работали и можно было записывать статусы пикапа
-- Придумываем DRAYAN_API_KEY, чтобы тот смог записывать статусы пикапа
-- Убеждаемся, что VITYA_API_KEY и DRAYAN_API_KEY разные!
+- Придумываем VITYA_API_KEY, чтобы методы map/force_map работали
 - Записываем все это в `.env` файл. Для примера - `.env.example`
 
 ### Установка и запуск
